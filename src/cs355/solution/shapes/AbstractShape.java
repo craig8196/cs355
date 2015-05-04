@@ -1,10 +1,10 @@
-package cs355.solution;
+package cs355.solution.shapes;
 
 import java.awt.Color;
 
-public class Shape {
+public abstract class AbstractShape {
 	private Color color = null;
-	public Shape(Color c) {
+	public AbstractShape(Color c) {
 		this.color = c;
 	}
 	

@@ -5,10 +5,6 @@
 package cs355.solution;
 
 import cs355.GUIFunctions;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import cs355.solution.Controller;
 
 /**
  *
@@ -23,8 +19,11 @@ public class CS355
     public static void main(String[] args) 
     {
     	Model m = new Model();
-    	Controller c = new Controller(m);
-    	View v = new View(m);
+    	ControllerModelWrapper cm = new ControllerModelWrapper(m);
+    	ViewModelWrapper vm = new ViewModelWrapper(m);
+    	
+    	Controller c = new Controller(cm);
+    	View v = new View(vm);
     	// Fill in the parameters below with your controller, view, 
     	//   mouse listener, and mouse motion listener
         GUIFunctions.createCS355Frame(c, v, c, c);

@@ -1,4 +1,4 @@
-package cs355.solution;
+package cs355.solution.shapes;
 
 public enum ShapeType {
 	LINE,

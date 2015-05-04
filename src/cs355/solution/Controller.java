@@ -1,28 +1,32 @@
 package cs355.solution;
 
-import static java.lang.System.out;
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.util.Iterator;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.util.Iterator;
+
+import cs355.solution.shapes.Point2D;
+import cs355.solution.shapes.ShapeType;
 
 public class Controller implements cs355.CS355Controller, MouseListener, MouseMotionListener {
 
 	
-	private Model model = null;
+	private ControllerModelWrapper model = null;
 	
 	private Color currentColor = new Color(128, 128, 128);
 	private ShapeType currentShapeType = null;
 	private int currentShapeHandle = -1;
 	
-	private boolean mouseDownMouseUp = true;
+	private boolean notTriangle = true;
 	private int clickCount = 0;
-	private boolean selecting = false;
+	// private boolean selecting = false;
 	private boolean mouseDown = false;
+	private Point2D firstClick = null;
+	private Point2D secondClick = null;
 	
-	public Controller(Model m) {
+	public Controller(ControllerModelWrapper m) {
 		this.model = m;
 	}
 	
@@ -37,42 +41,42 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	@Override
 	public void lineButtonHit() {
 		this.currentShapeType = ShapeType.LINE;
-		this.mouseDownMouseUp = true;
+		this.notTriangle = true;
 		this.clickCount = 0;
 	}
 	
 	@Override
 	public void triangleButtonHit() {
 		this.currentShapeType = ShapeType.TRIANGLE;
-		this.mouseDownMouseUp = false;
+		this.notTriangle = false;
 		this.clickCount = 0;
 	}
 
 	@Override
 	public void squareButtonHit() {
 		this.currentShapeType = ShapeType.SQUARE;
-		this.mouseDownMouseUp = true;
+		this.notTriangle = true;
 		this.clickCount = 0;
 	}
 
 	@Override
 	public void rectangleButtonHit() {
 		this.currentShapeType = ShapeType.RECTANGLE;
-		this.mouseDownMouseUp = true;
+		this.notTriangle = true;
 		this.clickCount = 0;
 	}
 
 	@Override
 	public void circleButtonHit() {
 		this.currentShapeType = ShapeType.CIRCLE;
-		this.mouseDownMouseUp = true;
+		this.notTriangle = true;
 		this.clickCount = 0;
 	}
 
 	@Override
 	public void ellipseButtonHit() {
 		this.currentShapeType = ShapeType.ELLIPSE;
-		this.mouseDownMouseUp = true;
+		this.notTriangle = true;
 		this.clickCount = 0;
 	}
 
@@ -167,25 +171,37 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	}
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		if(this.notTriangle && this.mouseDown) {
+			if(this.currentShapeHandle != -1) {
+				this.secondClick = new Point2D(e.getX(), e.getY());
+				this.model.setFirstTwoPoints(this.currentShapeHandle, this.firstClick, this.secondClick);
+			}
+		}
 	}
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		if(this.mouseDown) {
-			
+		if(!this.notTriangle) {
+			Point2D p = new Point2D(e.getX(), e.getY());
+			if(this.clickCount == 1) {
+				this.secondClick = p;
+				this.model.setFirstTwoPoints(this.currentShapeHandle, this.firstClick, this.secondClick);
+			} else if(this.clickCount == 2) {
+				this.model.setThirdPoint(this.currentShapeHandle, p);
+			}
 		}
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		out.println("Clicked");
-		if(!this.mouseDownMouseUp) {
+		if(!this.notTriangle) {
+			Point2D p = new Point2D(e.getX(), e.getY());
 			if(this.clickCount == 0) {
-				out.println("First Point");
+				this.firstClick = p;
+				this.currentShapeHandle = this.model.shapeFactory(this.currentColor, this.firstClick.x, this.firstClick.y, this.currentShapeType);
 			} else if(this.clickCount == 1) {
-				out.println("Second Point");
+				this.secondClick = p;
+				this.model.setFirstTwoPoints(this.currentShapeHandle, this.firstClick, this.secondClick);
 			} else if(this.clickCount == 2) {
-				out.println("Third Point");
+				this.model.setThirdPoint(this.currentShapeHandle, p);
 			}
 		}
 		this.clickCount++;
@@ -195,20 +211,18 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
-		out.println("Pressed");
-		if(this.mouseDownMouseUp) {
+		if(this.notTriangle) {
 			this.mouseDown = true;
-			double x1 = 0.0;
-			double y1 = 0.0;
-			this.currentShapeHandle = this.model.shapeFactory(this.currentColor, x1, y1, this.currentShapeType);
+			this.firstClick = new Point2D(e.getX(), e.getY());
+			this.currentShapeHandle = this.model.shapeFactory(this.currentColor, this.firstClick.x, this.firstClick.y, this.currentShapeType);
 		}
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		out.println("Released");
 		if(this.mouseDown) {
 			if(this.currentShapeHandle != -1) {
-				this.model.updateShape(this.currentShapeHandle, (s) -> { System.out.println("hi"); });
+				this.secondClick = new Point2D(e.getX(), e.getY());
+				this.model.setFirstTwoPoints(this.currentShapeHandle, this.firstClick, this.secondClick);
 			}
 		}
 		this.mouseDown = false;
