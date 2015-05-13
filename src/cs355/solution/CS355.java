@@ -22,8 +22,10 @@ public class CS355
     	ControllerModelWrapper cm = new ControllerModelWrapper(m);
     	ViewModelWrapper vm = new ViewModelWrapper(m);
     	
-    	Controller c = new Controller(cm);
     	View v = new View(vm);
+    	Controller c = new Controller(v, cm);
+    	v.setController(c);
+    	
     	// Fill in the parameters below with your controller, view, 
     	//   mouse listener, and mouse motion listener
         GUIFunctions.createCS355Frame(c, v, c, c);

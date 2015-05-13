@@ -1,6 +1,7 @@
 package cs355.solution;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observable;
 
@@ -9,14 +10,26 @@ import cs355.solution.shapes.UpdateShape;
 
 public class Model extends Observable {
 
+	public static final int INVALID_HANDLE = -1;
+	
 	private ArrayList<AbstractShape> shapesList = new ArrayList<AbstractShape>();
 	
 	public Model() {}
+	
 	public int addShape(AbstractShape s) {
 		this.shapesList.add(s);
 		this.setChanged();
 		this.notifyObservers();
 		return this.getFrontShapeHandle();
+	}
+	
+	public int hitShape(double x, double y) {
+		for(int i = this.shapesList.size() - 1; i >= 0; i--) {
+			if(this.shapesList.get(i).isPointInShape(new Point2D.Double(x, y))) {
+				return i;
+			}
+		}
+		return Model.INVALID_HANDLE;
 	}
 	
 	public Color getColorByHandle(int i) {
@@ -44,7 +57,7 @@ public class Model extends Observable {
 		}
 		return result;
 	}
-
+	
 	public boolean inRange(ArrayList<AbstractShape> l, int i) {
 		if(l == null) {
 			return false;
@@ -52,7 +65,7 @@ public class Model extends Observable {
 		
 		return i >= 0 && i <= l.size() - 1;
 	}
-
+	
 	public void updateShape(int handle, UpdateShape f) {
 		if(this.inRange(this.shapesList, handle)) {
 			f.updateShape(this.shapesList.get(handle));

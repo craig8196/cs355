@@ -1,12 +1,14 @@
 package cs355.solution;
 
-public class Pair<A, B> {
+public class Triple<A, B, C> {
 	
 	public A first = null;
 	public B second = null;
+	public C third = null;
 	
-	public Pair(A first, B second) {
+	public Triple(A first, B second, C third) {
 		this.first = first;
 		this.second = second;
+		this.third = third;
 	}
 }

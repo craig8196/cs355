@@ -1,38 +1,41 @@
 package cs355.solution.shapes;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 public class Ellipse extends AbstractShape {
 
-	private Point2D center = new Point2D(0.0, 0.0);
-	private double w = 0.0;
-	private double h = 0.0;
+	private double radiusX = 0.0;
+	private double radiusY = 0.0;
 	
-	public Ellipse(Color c) {
-		super(c);
+	public Ellipse(Color c, double x, double y) {
+		super(c, x, y);
 	}
 	
-	public Point2D getCenterPoint() {
-		return this.center;
+	public double getRadiusX() {
+		return this.radiusX;
 	}
 	
-	public double getHeight() {
-		return this.h;
+	public double getRadiusY() {
+		return this.radiusY;
 	}
 	
-	public double getWidth() {
-		return this.w;
+	public void setRadiusX(double xr) {
+		this.radiusX = xr;
 	}
 	
-	public void setCenterPoint(double x, double y) {
-		this.center = new Point2D(x, y);
+	public void setRadiusY(double yr) {
+		this.radiusY = yr;
 	}
-	
-	public void setHeight(double height) {
-		this.h = height;
-	}
-	
-	public void setWidth(double width) {
-		this.w = width;
+
+	@Override
+	public boolean isPointInShape(Point2D.Double p) {
+		Point2D.Double objSpace = new Point2D.Double();
+		this.getWorldToObjectTransform().transform(p, objSpace);
+		if((  ((objSpace.x*objSpace.x)/(this.radiusX*this.radiusX))
+			+ ((objSpace.y*objSpace.y)/(this.radiusY*this.radiusY))  ) <= 1.0) {
+			return true;
+		}
+		return false;
 	}
 }

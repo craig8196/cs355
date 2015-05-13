@@ -1,29 +1,36 @@
 package cs355.solution.shapes;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 public class Square extends AbstractShape {
 
-	private Point2D topLeftPoint = new Point2D(0.0, 0.0);
-	private double side = 0.0;
+	private double halfSide = 0.0;
 	
-	public Square(Color c) {
-		super(c);
+	public Square(Color c, double x, double y) {
+		super(c, x, y);
 	}
 	
-	public void setTopLeftPoint(double x, double y) {
-		this.topLeftPoint = new Point2D(x, y);
-	}
-	
-	public void setSide(double side) {
-		this.side = side;
-	}
-	
-	public Point2D getTopLeftPoint() {
-		return this.topLeftPoint;
+	public double getHalfSide() {
+		return this.halfSide;
 	}
 	
 	public double getSide() {
-		return this.side;
+		return this.halfSide*2.0;
+	}
+	
+	public void setSide(double side) {
+		this.halfSide = side/2.0;
+	}
+
+	@Override
+	public boolean isPointInShape(Point2D.Double p) {
+		Point2D.Double objSpace = new Point2D.Double();
+		this.getWorldToObjectTransform().transform(p, objSpace);
+		if(Math.abs(objSpace.x) <= this.halfSide && Math.abs(objSpace.y) <= this.halfSide) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

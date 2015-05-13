@@ -1,12 +1,12 @@
 package cs355.solution;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 import cs355.solution.shapes.AbstractShape;
 import cs355.solution.shapes.Circle;
 import cs355.solution.shapes.Ellipse;
 import cs355.solution.shapes.Line;
-import cs355.solution.shapes.Point2D;
 import cs355.solution.shapes.Rectangle;
 import cs355.solution.shapes.ShapeType;
 import cs355.solution.shapes.Square;
@@ -20,7 +20,11 @@ public class ControllerModelWrapper {
 		this.model = m;
 	}
 	
-	public void setFirstTwoPoints(int handle, Point2D p1, Point2D p2) {
+	public int hitShape(double x, double y) {
+		return this.model.hitShape(x, y);
+	}
+	
+	public void setFirstTwoPoints(int handle, Point2D.Double p1, Point2D.Double p2) {
 		this.model.updateShape(handle, (s)->{
 			if(s instanceof Line) {
 				Line l = (Line)s;
@@ -36,18 +40,18 @@ public class ControllerModelWrapper {
 				} else {
 					side = Math.abs(deltaY);
 				}
-				double x = Math.min(p1.x, p1.x + side*this.signOf(deltaX));
-				double y = Math.min(p1.y, p1.y + side*this.signOf(deltaY));
+				double x = Math.min(p1.x, p1.x + side*this.signOf(deltaX)) + side/2.0;
+				double y = Math.min(p1.y, p1.y + side*this.signOf(deltaY)) + side/2.0;
 				
-				sq.setTopLeftPoint(x, y);
+				sq.setCenter(x, y);
 				sq.setSide(side);
 			} else if(s instanceof Rectangle) {
 				Rectangle r = (Rectangle)s;
-				double x = Math.min(p1.x, p2.x);
-				double y = Math.min(p1.y, p2.y);
+				double x = (p1.x + p2.x)/2.0;
+				double y = (p1.y + p2.y)/2.0;
 				double width = Math.abs(p1.x - p2.x);
 				double height = Math.abs(p1.y - p2.y);
-				r.setTopLeftCorner(x, y);
+				r.setCenter(x, y);
 				r.setWidth(width);
 				r.setHeight(height);
 			} else if(s instanceof Circle) {
@@ -57,31 +61,39 @@ public class ControllerModelWrapper {
 				double radius = Math.min(Math.abs(deltaX), Math.abs(deltaY))/2.0;
 				double cx = Math.min(p1.x, p1.x + radius*2.0*this.signOf(deltaX)) + radius;
 				double cy = Math.min(p1.y, p1.y + radius*2.0*this.signOf(deltaY)) + radius;
-				c.setCenterPoint(cx, cy);
+				c.setCenter(cx, cy);
 				c.setRadius(radius);
 			} else if(s instanceof Ellipse) {
 				Ellipse e = (Ellipse)s;
-				double w = Math.abs(p1.x - p2.x);
-				double h = Math.abs(p1.y - p2.y);
-				double cx = Math.min(p1.x, p2.x) + w/2.0;
-				double cy = Math.min(p1.y, p2.y) + h/2.0;
-				e.setCenterPoint(cx, cy);
-				e.setWidth(w);
-				e.setHeight(h);
+				double rx = Math.abs(p1.x - p2.x)/2.0;
+				double ry = Math.abs(p1.y - p2.y)/2.0;
+				double cx = (p1.x + p2.x)/2.0;
+				double cy = (p1.y + p2.y)/2.0;
+				e.setCenter(cx, cy);
+				e.setRadiusX(rx);
+				e.setRadiusY(ry);
 			} else if(s instanceof Triangle) {
 				Triangle t = (Triangle)s;
-				t.setFirstPoint(p1.x, p1.y);
-				t.setSecondPoint(p2.x, p2.y);
-				t.setThirdPoint(p2.x, p2.y);
+				double cx = (p1.x + p2.x)/2.0;
+				double cy = (p1.y + p2.y)/2.0;
+				t.setCenter(cx, cy);
+				t.setFirstPoint(p1.x - cx, p1.y - cy);
+				t.setSecondPoint(p2.x - cx, p2.y - cy);
+				t.setThirdPoint(p2.x - cx, p2.y - cy);
 			}
 		});
 	}
 	
-	public void setThirdPoint(int handle, Point2D p3) {
+	public void setThirdPoint(int handle, Point2D.Double p1, Point2D.Double p2, Point2D.Double p3) {
 		this.model.updateShape(handle, (s)->{
 			if(s instanceof Triangle) {
 				Triangle t = (Triangle)s;
-				t.setThirdPoint(p3.x, p3.y);
+				double cx = (p1.x + p2.x + p3.x)/3.0;
+				double cy = (p1.y + p2.y + p3.y)/3.0;
+				t.setCenter(cx, cy);
+				t.setFirstPoint(p1.x - cx, p1.y - cy);
+				t.setSecondPoint(p2.x - cx, p2.y - cy);
+				t.setThirdPoint(p3.x - cx, p3.y - cy);
 			}
 		});
 	}
@@ -93,28 +105,28 @@ public class ControllerModelWrapper {
 		AbstractShape s = null;
 		switch(shape) {
 			case LINE:
-				s = new Line(c);
+				s = new Line(c, x1, y1);
 				break;
 			case SQUARE:
-				s = new Square(c);
+				s = new Square(c, x1, y1);
 				break;
 			case RECTANGLE:
-				s = new Rectangle(c);
+				s = new Rectangle(c, x1, y1);
 				break;
 			case CIRCLE:
-				s = new Circle(c);
+				s = new Circle(c, x1, y1);
 				break;
 			case ELLIPSE:
-				s = new Ellipse(c);
+				s = new Ellipse(c, x1, y1);
 				break;
 			case TRIANGLE:
-				s = new Triangle(c);
+				s = new Triangle(c, x1, y1);
 				break;
 			default:
 				return -1;
 		}
 		int handle = this.model.addShape(s);
-		this.setFirstTwoPoints(handle, new Point2D(x1, y1), new Point2D(x1, y1));
+		this.setFirstTwoPoints(handle, new Point2D.Double(x1, y1), new Point2D.Double(x1, y1));
 		
 		return this.model.getFrontShapeHandle();
 	}
