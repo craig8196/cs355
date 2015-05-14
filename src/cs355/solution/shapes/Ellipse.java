@@ -29,7 +29,7 @@ public class Ellipse extends AbstractShape {
 	}
 
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double objSpace = new Point2D.Double();
 		this.getWorldToObjectTransform().transform(p, objSpace);
 		if((  ((objSpace.x*objSpace.x)/(this.radiusX*this.radiusX))

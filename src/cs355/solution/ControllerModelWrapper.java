@@ -11,8 +11,18 @@ import cs355.solution.shapes.Rectangle;
 import cs355.solution.shapes.ShapeType;
 import cs355.solution.shapes.Square;
 import cs355.solution.shapes.Triangle;
+import cs355.solution.shapes.UpdateShape;
+import cs355.solution.shapes.Utilities;
 
 public class ControllerModelWrapper {
+	
+	public void updateShape(int handle, UpdateShape f) {
+		model.updateShape(handle, f);
+	}
+
+	public AbstractShape getShapeByHandle(int i) {
+		return model.getShapeByHandle(i);
+	}
 	
 	private Model model = null;
 
@@ -21,7 +31,24 @@ public class ControllerModelWrapper {
 	}
 	
 	public int hitShape(double x, double y) {
-		return this.model.hitShape(x, y);
+		return this.model.hitShape(x, y, Controller.TOLERANCE);
+	}
+	
+	public boolean hitShapeRotateHandle(int handle, Point2D.Double p, double radius) {
+		AbstractShape s = this.getShapeByHandle(handle);
+		Point2D.Double objSpace = new Point2D.Double();
+		s.getWorldToObjectTransform().transform(p, objSpace);
+		Point2D.Double rotatePoint = Utilities.getObjectSpaceVectorToRotationHandleCenter(s, radius);
+		if(rotatePoint == null) {
+			return false;
+		}
+		double dx = Math.abs(rotatePoint.x - objSpace.x);
+		double dy = Math.abs(rotatePoint.y - objSpace.y);
+		if(dx*dx + dy*dy <= radius*radius) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public void setFirstTwoPoints(int handle, Point2D.Double p1, Point2D.Double p2) {
@@ -129,6 +156,11 @@ public class ControllerModelWrapper {
 		this.setFirstTwoPoints(handle, new Point2D.Double(x1, y1), new Point2D.Double(x1, y1));
 		
 		return this.model.getFrontShapeHandle();
+	}
+	
+	
+	public boolean hitShapeHandle(int handle, Point2D.Double p) {
+		return false;
 	}
 	
 	private double signOf(double x) {

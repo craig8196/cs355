@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 
 public class Line extends AbstractShape {
 
-	private final double pixelTolerance = 4.0;
 	private Point2D.Double p1 = new Point2D.Double(0.0, 0.0);
 	private Point2D.Double p2 = new Point2D.Double(0.0, 0.0);
 	
@@ -49,10 +48,10 @@ public class Line extends AbstractShape {
 	}
 	
 	// Helper function to isPointInShape.
-	private boolean isPointNear(Point2D.Double p, Point2D.Double o) {
+	private boolean isPointNear(Point2D.Double p, Point2D.Double o, double tolerance) {
 		double dx = Math.abs(p.x - o.x);
 		double dy = Math.abs(p.y - o.y);
-		if(dx*dx + dy*dy <= this.pixelTolerance*this.pixelTolerance) {
+		if(dx*dx + dy*dy <= tolerance*tolerance) {
 			return true;
 		} else {
 			return false;
@@ -60,7 +59,7 @@ public class Line extends AbstractShape {
 	}
 	
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double perpVector = new Point2D.Double(this.p1.y - this.p2.y, this.p2.x - this.p1.x);
 		double length = Math.sqrt(perpVector.x*perpVector.x + perpVector.y*perpVector.y);
 		double epsilon = 10e-5;
@@ -70,7 +69,7 @@ public class Line extends AbstractShape {
 			Point2D.Double normPerpVector = new Point2D.Double(perpVector.x/length, perpVector.y/length);
 			double lineDistanceFromOrigin = this.p1.x*normPerpVector.x + this.p1.y*normPerpVector.y;
 			double pointDistanceFromOrigin = p.x*normPerpVector.x + p.y*normPerpVector.y;
-			isPointOnLine = Math.abs(lineDistanceFromOrigin - pointDistanceFromOrigin) <= this.pixelTolerance;
+			isPointOnLine = Math.abs(lineDistanceFromOrigin - pointDistanceFromOrigin) <= tolerance;
 			if(isPointOnLine && this.isPointBetween(p, normPerpVector)) {
 				return true;
 			}
@@ -84,7 +83,7 @@ public class Line extends AbstractShape {
 		}
 		
 		// Check to see if the point is near one of the two end points
-		if(this.isPointNear(p, this.p1) || this.isPointNear(p, this.p2)) {
+		if(this.isPointNear(p, this.p1, tolerance) || this.isPointNear(p, this.p2, tolerance)) {
 			return true;
 		} else {
 			return false;

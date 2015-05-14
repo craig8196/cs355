@@ -38,7 +38,7 @@ public class Triangle extends AbstractShape {
 	}
 
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double objSpace = new Point2D.Double();
 		this.getWorldToObjectTransform().transform(p, objSpace);
 		Point2D.Double[] pts = new Point2D.Double[3];
@@ -67,4 +67,21 @@ public class Triangle extends AbstractShape {
 		}
 		return true;
 	}
+	
+	public int[] getXCoords() {
+		int[] result = new int[3];
+		result[0] = (int)Math.round(this.p1.x);
+		result[1] = (int)Math.round(this.p2.x);
+		result[2] = (int)Math.round(this.p3.x);
+		return result;
+	}
+	
+	public int[] getYCoords() {
+		int[] result = new int[3];
+		result[0] = (int)Math.round(this.p1.y);
+		result[1] = (int)Math.round(this.p2.y);
+		result[2] = (int)Math.round(this.p3.y);
+		return result;
+	}
+	
 }

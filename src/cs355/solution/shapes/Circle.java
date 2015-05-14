@@ -24,7 +24,7 @@ public class Circle extends AbstractShape {
 	}
 
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double objSpace = new Point2D.Double();
 		this.getWorldToObjectTransform().transform(p, objSpace);
 		if((objSpace.x*objSpace.x + objSpace.y*objSpace.y) <= (this.radius*this.radius)) {

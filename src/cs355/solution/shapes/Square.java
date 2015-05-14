@@ -24,7 +24,7 @@ public class Square extends AbstractShape {
 	}
 
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double objSpace = new Point2D.Double();
 		this.getWorldToObjectTransform().transform(p, objSpace);
 		if(Math.abs(objSpace.x) <= this.halfSide && Math.abs(objSpace.y) <= this.halfSide) {

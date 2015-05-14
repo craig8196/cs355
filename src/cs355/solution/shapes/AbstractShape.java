@@ -27,7 +27,7 @@ public abstract class AbstractShape {
 		return this.angle;
 	}
 	
-	public Point2D getCenter() {
+	public Point2D.Double getCenter() {
 		return this.center;
 	}
 	
@@ -37,10 +37,14 @@ public abstract class AbstractShape {
 		}
 	}
 	
-	public abstract boolean isPointInShape(Point2D.Double p);
+	public abstract boolean isPointInShape(Point2D.Double p, double tolerance);
 	
 	public void setCenter(double x, double y) {
 		this.center = new Point2D.Double(x, y);
+	}
+	
+	public void setAngle(double a) {
+		this.angle = a;
 	}
 	
 	public AffineTransform getObjectToWorldTransform() {

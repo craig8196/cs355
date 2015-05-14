@@ -37,7 +37,7 @@ public class Rectangle extends AbstractShape {
 	}
 
 	@Override
-	public boolean isPointInShape(Point2D.Double p) {
+	public boolean isPointInShape(Point2D.Double p, double tolerance) {
 		Point2D.Double objPoint = new Point2D.Double(0.0, 0.0);
 		this.getWorldToObjectTransform().transform(new Point2D.Double(p.x, p.y), objPoint);
 		if(Math.abs(objPoint.x) <= this.halfWidth && Math.abs(objPoint.y) <= this.halfHeight) {
