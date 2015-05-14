@@ -42,7 +42,7 @@ public class Utilities {
 	public static Point2D.Double getObjectSpaceVectorToRotationHandleCenter(AbstractShape s, double radius) {
 		Point2D.Double result = new Point2D.Double();
 		
-		if(s instanceof Triangle || s instanceof Circle) {
+		if(s instanceof Line || s instanceof Circle) {
 			result = null;
 		} else if(s instanceof Square) {
 			Square sq = (Square)s;

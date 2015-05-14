@@ -9,9 +9,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
-
+import cs355.solution.shapes.AbstractShape;
+import cs355.solution.shapes.Line;
 import cs355.solution.shapes.ShapeType;
-import cs355.solution.shapes.Triangle;
 
 public class Controller implements cs355.CS355Controller, MouseListener, MouseMotionListener {
 	
@@ -38,6 +38,8 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private boolean selectingTranslating = false;
 	private boolean selectingRotating = false;
 	private double selectingOriginalAngle = 0.0;
+	private Point2D.Double selectingLineP1 = null;
+	private Point2D.Double selectingLineP2 = null;
 	
 	public Controller(View v, ControllerModelWrapper m) {
 		this.model = m;
@@ -51,6 +53,11 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		}
 		this.currentColor = c;
 		this.view.setColorSwatch(c);
+		if(this.selecting && this.currentShapeHandle != Model.INVALID_HANDLE) {
+			this.model.updateShape(this.currentShapeHandle, (s)->{
+				s.setColor(this.currentColor);
+			});
+		}
 	}
 	
 	public Color getCurrentColor() {
@@ -205,12 +212,15 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		if(this.selecting) {
 			if(this.selectingTranslating) {
 				this.model.updateShape(this.currentShapeHandle, (s)->{
-					if(s instanceof Triangle) {
-						
+					Point2D.Double c = this.selectingOriginalOrigin;
+					Point2D.Double md = this.selectingMouseDown;
+					Point2D.Double diff = new Point2D.Double(p.x - md.x, p.y - md.y);
+					if(s instanceof Line) {
+						Line l = (Line)s;
+						l.setFirstPoint(diff.x + this.selectingLineP1.x, diff.y + this.selectingLineP1.y);
+						l.setSecondPoint(diff.x + this.selectingLineP2.x, diff.y + this.selectingLineP2.y);
 					} else {
-						Point2D.Double c = this.selectingOriginalOrigin;
-						Point2D.Double md = this.selectingMouseDown;
-						s.setCenter(p.x - md.x + c.x, p.y - md.y + c.y);
+						s.setCenter(diff.x + c.x, diff.y + c.y);
 					}
 				});
 			} else if(this.selectingRotating) {
@@ -270,6 +280,11 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 			
 			this.currentShapeHandle = shapeHandle;
 			
+			if(shapeHandle != Model.INVALID_HANDLE) {
+				this.currentColor = this.model.getColorByHandle(shapeHandle);
+				this.view.setColorSwatch(this.currentColor);
+			}
+			
 			if(updateView) {
 				this.view.update();
 			}
@@ -295,8 +310,14 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		if(this.selecting) {
 			if(this.currentShapeHandle != Model.INVALID_HANDLE) {
 				this.selectingMouseDown = p;
-				this.selectingOriginalOrigin = this.model.getShapeByHandle(this.currentShapeHandle).getCenter();
-				this.selectingOriginalAngle = this.model.getShapeByHandle(this.currentShapeHandle).getAngle();
+				AbstractShape as = this.model.getShapeByHandle(this.currentShapeHandle);
+				this.selectingOriginalOrigin = as.getCenter();
+				this.selectingOriginalAngle = as.getAngle();
+				if(as instanceof Line) {
+					Line l = (Line)as;
+					this.selectingLineP1 = l.getFirstPoint();
+					this.selectingLineP2 = l.getSecondPoint();
+				}
 				if(this.model.getShapeByHandle(this.currentShapeHandle).isPointInShape(p, Controller.TOLERANCE)) {
 					this.selectingTranslating = true;
 				} else if(this.model.hitShapeRotateHandle(this.currentShapeHandle, p, this.getVisualHandleRadius())) {

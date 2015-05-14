@@ -16,6 +16,10 @@ import cs355.solution.shapes.Utilities;
 
 public class ControllerModelWrapper {
 	
+	public Color getColorByHandle(int i) {
+		return model.getColorByHandle(i);
+	}
+
 	public void updateShape(int handle, UpdateShape f) {
 		model.updateShape(handle, f);
 	}

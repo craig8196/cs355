@@ -102,13 +102,11 @@ public class View implements Observer, ViewRefresher {
 			double radius = c.getRadius();
 			double hw = radius;
 			double hh = radius;
-			Ellipse2D.Double handleAngle = new Ellipse2D.Double(hw + hd, -hr, hd, hd);
 			Ellipse2D.Double outline = new Ellipse2D.Double(-radius, -radius, radius*2.0, radius*2.0);
 			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
 			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
 			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
 			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-			g2d.draw(handleAngle);
 			g2d.draw(outline);
 		} else if(s instanceof Ellipse) {
 			Ellipse e = (Ellipse)s;
