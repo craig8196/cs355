@@ -41,6 +41,46 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private Point2D.Double selectingLineP1 = null;
 	private Point2D.Double selectingLineP2 = null;
 	
+	// Zooming in and out.
+	private double[] zoomLevels = { 0.25, 0.5, 1.0, 2.0, 4.0 };
+	private int currentZoomLevelIndex = 2;
+	private Point2D.Double viewportTopLeft = new Point2D.Double(0.0, 0.0);
+	public static final double worldXMin = 0.0;
+	public static final double worldXMax = 2048.0;
+	public static final double worldYMin = 0.0;
+	public static final double worldYMax = 2048.0;
+	public static final double viewSizeX = 512.0; // In world units.
+	public static final double viewSizeY = 512.0; // In world units.
+	private boolean updatingZoom = false;
+	
+	public double getZoomScalingFactor() {
+		return this.zoomLevels[this.currentZoomLevelIndex];
+	}
+	
+	public AffineTransform getWorldToViewTransform() {
+		double scaleFactor = this.getZoomScalingFactor();
+		AffineTransform result = new AffineTransform();
+		AffineTransform translate = new AffineTransform(1.0, 0.0, 0.0, 1.0, -this.viewportTopLeft.x, -this.viewportTopLeft.y);
+		AffineTransform scale = new AffineTransform(scaleFactor, 0.0, 0.0, scaleFactor, 0.0, 0.0);
+		result.concatenate(scale);
+		result.concatenate(translate);
+		return result;
+	}
+	
+	public AffineTransform getViewToWorldTransform() {
+		double scaleFactor = 1/this.getZoomScalingFactor();
+		AffineTransform result = new AffineTransform();
+		AffineTransform translate = new AffineTransform(1.0, 0.0, 0.0, 1.0, this.viewportTopLeft.x, this.viewportTopLeft.y);
+		AffineTransform scale = new AffineTransform(scaleFactor, 0.0, 0.0, scaleFactor, 0.0, 0.0);
+		result.concatenate(translate);
+		result.concatenate(scale);
+		return result;
+	}
+	
+	public Point2D.Double getViewTopLeftCorner() {
+		return this.viewportTopLeft;
+	}
+	
 	public Controller(View v, ControllerModelWrapper m) {
 		this.model = m;
 		this.view = v;
@@ -123,28 +163,87 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		this.currentShapeHandle = -1;
 	}
 
+	
+	
+	private Point2D.Double getViewPortCenter() {
+		double preZoomScale = this.getZoomScalingFactor();
+		double width = preZoomScale*Controller.viewSizeX;
+		double height = preZoomScale*Controller.viewSizeY;
+		return new Point2D.Double(this.viewportTopLeft.x+width/2.0, this.viewportTopLeft.y+height/2.0);
+	}
+	
+	private void setNewViewPortTopLeftCorner(Point2D.Double c) {
+		double postZoomScale = this.getZoomScalingFactor();
+		double width = postZoomScale*Controller.viewSizeX;
+		double height = postZoomScale*Controller.viewSizeY;
+		double halfWidth = width/2.0;
+		double halfHeight = height/2.0;
+		double x = c.x - halfWidth;
+		double y = c.y - halfHeight;
+		double xRight = c.x + halfWidth;
+		double yBottom = c.y + halfHeight;
+		if(x < Controller.worldXMin) {
+			x = Controller.worldXMin;
+		}
+		if(y < Controller.worldYMin) {
+			y = Controller.worldYMin;
+		}
+		if(xRight > Controller.worldXMax) {
+			x = Controller.worldXMax - width;
+		}
+		if(yBottom > Controller.worldYMax) {
+			y = Controller.worldYMax - height;
+		}
+		this.viewportTopLeft.x = x;
+		this.viewportTopLeft.y = y;
+	}
+	
 	@Override
-	public void zoomInButtonHit() {
-		// TODO Auto-generated method stub
-		
+	public void zoomOutButtonHit() {
+		System.out.println("Zoom In");
+		this.updatingZoom = true;
+		if(this.currentZoomLevelIndex > 0) {
+			Point2D.Double center = this.getViewPortCenter();
+			this.currentZoomLevelIndex--;
+			this.setNewViewPortTopLeftCorner(center);
+			this.view.updateScrollBars();
+			this.view.update();
+		}
+		this.updatingZoom = false;
+		System.out.println(this.currentZoomLevelIndex);
 	}
 
 	@Override
-	public void zoomOutButtonHit() {
-		// TODO Auto-generated method stub
-		
+	public void zoomInButtonHit() {
+		System.out.println("Zoom Out");
+		this.updatingZoom = true;
+		if(this.currentZoomLevelIndex < (this.zoomLevels.length - 1)) {
+			Point2D.Double center = this.getViewPortCenter();
+			this.currentZoomLevelIndex++;
+			this.setNewViewPortTopLeftCorner(center);
+			this.view.updateScrollBars();
+			this.view.update();
+		}
+		this.updatingZoom = false;
+		System.out.println(this.currentZoomLevelIndex);
 	}
 
 	@Override
 	public void hScrollbarChanged(int value) {
-		// TODO Auto-generated method stub
-		
+		System.out.println(value);
+		this.viewportTopLeft.x = (double)value;
+		if(!this.updatingZoom) {
+			this.view.update();
+		}
 	}
 
 	@Override
 	public void vScrollbarChanged(int value) {
-		// TODO Auto-generated method stub
-		
+		System.out.println(value);
+		this.viewportTopLeft.y = (double)value;
+		if(!this.updatingZoom) {
+			this.view.update();
+		}
 	}
 
 	@Override
@@ -206,9 +305,16 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private Point2D.Double getWorldPointFromClick(MouseEvent e) {
+		Point2D.Double result = new Point2D.Double();
+		this.getViewToWorldTransform().transform(new Point2D.Double(e.getX(), e.getY()), result);
+		return result;
+	}
+	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
 			if(this.selectingTranslating) {
 				this.model.updateShape(this.currentShapeHandle, (s)->{
@@ -246,7 +352,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	}
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
 			
 		} else {
@@ -262,7 +368,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
 			if(this.currentShapeHandle != Model.INVALID_HANDLE &&
 			   (this.model.getShapeByHandle(this.currentShapeHandle).isPointInShape(p, Controller.TOLERANCE) ||
@@ -306,7 +412,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
-		Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
 			if(this.currentShapeHandle != Model.INVALID_HANDLE) {
 				this.selectingMouseDown = p;
@@ -343,7 +449,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		} else {
 			if(this.mouseDown) {
 				if(this.currentShapeHandle != Model.INVALID_HANDLE) {
-					this.secondClick = new Point2D.Double(e.getX(), e.getY());
+					this.secondClick = this.getWorldPointFromClick(e);
 					this.model.setFirstTwoPoints(this.currentShapeHandle, this.firstClick, this.secondClick);
 				}
 			}

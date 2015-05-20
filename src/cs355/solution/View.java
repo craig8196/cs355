@@ -42,11 +42,20 @@ public class View implements Observer, ViewRefresher {
 	public void refreshView(Graphics2D g2d) {
 		if(!this.initialized) { // Set the color swatch the first time through.
 			this.setColorSwatch(this.controller.getCurrentColor());
+			GUIFunctions.setHScrollBarMin((int)Controller.worldXMin);
+			GUIFunctions.setHScrollBarMax((int)Controller.worldXMax);
+			GUIFunctions.setVScrollBarMin((int)Controller.worldYMin);
+			GUIFunctions.setVScrollBarMax((int)Controller.worldYMax);
+			this.updateHScrollBar();
+			this.updateVScrollBar();
 			this.initialized = true;
 		}
+		AffineTransform worldToView = this.controller.getWorldToViewTransform();
 		for(Triple<Color, AffineTransform, Shape> p: this.model.getGraphicalColorShapeTriples()) {
 			g2d.setColor(p.first);
-			g2d.setTransform(p.second);
+			AffineTransform objToWorldToView = new AffineTransform(worldToView);
+			objToWorldToView.concatenate(p.second);
+			g2d.setTransform(objToWorldToView);
 			g2d.draw(p.third);
 			g2d.fill(p.third);
 		}
@@ -55,6 +64,25 @@ public class View implements Observer, ViewRefresher {
 				this.drawShapeHandles(g2d, this.controller.getCurrentShapeHandle());
 			}
 		}
+	}
+	
+	public void updateHScrollBar() {
+		double scale = this.controller.getZoomScalingFactor();
+		double size = Controller.viewSizeX;
+		GUIFunctions.setHScrollBarKnob((int)(size/scale));
+		GUIFunctions.setHScrollBarPosit((int)(this.controller.getViewTopLeftCorner().x));
+	}
+	
+	public void updateVScrollBar() {
+		double scale = this.controller.getZoomScalingFactor();
+		double size = Controller.viewSizeY;
+		GUIFunctions.setVScrollBarKnob((int)(size/scale));
+		GUIFunctions.setVScrollBarPosit((int)(this.controller.getViewTopLeftCorner().y));
+	}
+	
+	public void updateScrollBars() {
+		this.updateHScrollBar();
+		this.updateVScrollBar();
 	}
 	
 	public void drawShapeHandles(Graphics2D g2d, int handle) {

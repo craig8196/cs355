@@ -49,15 +49,23 @@ public abstract class AbstractShape {
 	
 	public AffineTransform getObjectToWorldTransform() {
 		AffineTransform result = new AffineTransform();
-		result.translate(this.center.x, this.center.y);
-		result.rotate(this.angle);
+		AffineTransform translate = new AffineTransform(1.0, 0.0, 0.0, 1.0, this.center.x, this.center.y);
+		double cos = Math.cos(this.angle);
+		double sin = Math.sin(this.angle);
+		AffineTransform rotate = new AffineTransform(cos, sin, -sin, cos, 0.0, 0.0);
+		result.concatenate(translate);
+		result.concatenate(rotate);
 		return result;
 	}
 	
 	public AffineTransform getWorldToObjectTransform() {
 		AffineTransform result = new AffineTransform();
-		result.rotate(-this.angle);
-		result.translate(-this.center.x, -this.center.y);
+		AffineTransform inverseTranslate = new AffineTransform(1.0, 0.0, 0.0, 1.0, -this.center.x, -this.center.y);
+		double cos = Math.cos(this.angle);
+		double sin = Math.sin(this.angle);
+		AffineTransform inverseRotate = new AffineTransform(cos, -sin, sin, cos, 0.0, 0.0);
+		result.concatenate(inverseRotate);
+		result.concatenate(inverseTranslate);
 		return result;
 	}
 	
