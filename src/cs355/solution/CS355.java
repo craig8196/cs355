@@ -19,11 +19,10 @@ public class CS355
     public static void main(String[] args) 
     {
     	Model m = new Model();
-    	ControllerModelWrapper cm = new ControllerModelWrapper(m);
-    	ViewModelWrapper vm = new ViewModelWrapper(m);
+    	ModelWrapper mw = new ModelWrapper(m);
     	
-    	View v = new View(vm);
-    	Controller c = new Controller(v, cm);
+    	View v = new View(mw);
+    	Controller c = new Controller(v, mw);
     	v.setController(c);
     	
     	// Fill in the parameters below with your controller, view, 

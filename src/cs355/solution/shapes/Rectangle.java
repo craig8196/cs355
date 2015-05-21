@@ -8,6 +8,10 @@ public class Rectangle extends AbstractShape {
 	private double halfWidth = 0.0;
 	private double halfHeight = 0.0;
 	
+	public Rectangle() {
+		super();
+	}
+	
 	public Rectangle(Color c, double x, double y) {
 		super(c, x, y);
 	}

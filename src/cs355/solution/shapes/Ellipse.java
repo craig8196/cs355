@@ -8,6 +8,10 @@ public class Ellipse extends AbstractShape {
 	private double radiusX = 0.0;
 	private double radiusY = 0.0;
 	
+	public Ellipse() {
+		super();
+	}
+	
 	public Ellipse(Color c, double x, double y) {
 		super(c, x, y);
 	}

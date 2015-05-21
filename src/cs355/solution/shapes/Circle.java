@@ -7,6 +7,10 @@ public class Circle extends AbstractShape {
 	
 	private double radius = 0.0;
 	
+	public Circle() {
+		super();
+	}
+	
 	public Circle(Color c, double x, double y) {
 		super(c, x, y);
 	}

@@ -10,7 +10,7 @@ import cs355.solution.shapes.UpdateShape;
 
 public class Model extends Observable {
 
-	public static final int INVALID_HANDLE = -1;
+	public static final int INVALID_ID = -1;
 	
 	private ArrayList<AbstractShape> shapesList = new ArrayList<AbstractShape>();
 	
@@ -20,7 +20,7 @@ public class Model extends Observable {
 		this.shapesList.add(s);
 		this.setChanged();
 		this.notifyObservers();
-		return this.getFrontShapeHandle();
+		return this.getFrontShapeId();
 	}
 	
 	public int hitShape(double x, double y, double tolerance) {
@@ -29,28 +29,28 @@ public class Model extends Observable {
 				return i;
 			}
 		}
-		return Model.INVALID_HANDLE;
+		return Model.INVALID_ID;
 	}
 	
-	public Color getColorByHandle(int i) {
+	public Color getColorById(int i) {
 		if(this.inRange(this.shapesList, i)) {
 			return this.shapesList.get(i).getColor();
 		}
 		return null;
 	}
 	
-	public int getFrontShapeHandle() {
+	public int getFrontShapeId() {
 		return this.shapesList.size() - 1;
 	}
 	
-	public AbstractShape getShapeByHandle(int i) {
+	public AbstractShape getShapeById(int i) {
 		if(this.inRange(this.shapesList, i)) {
 			return this.shapesList.get(i);
 		}
 		return null;
 	}
 
-	public Iterable<Integer> getShapeHandles() {
+	public Iterable<Integer> getShapeIds() {
 		ArrayList<Integer> result = new ArrayList<Integer>();
 		for(int i = 0; i < this.shapesList.size(); i++) {
 			result.add(i);
@@ -66,9 +66,9 @@ public class Model extends Observable {
 		return i >= 0 && i <= l.size() - 1;
 	}
 	
-	public void updateShape(int handle, UpdateShape f) {
-		if(this.inRange(this.shapesList, handle)) {
-			f.updateShape(this.shapesList.get(handle));
+	public void updateShape(int id, UpdateShape f) {
+		if(this.inRange(this.shapesList, id)) {
+			f.updateShape(this.shapesList.get(id));
 		}
 		this.setChanged();
 		this.notifyObservers();

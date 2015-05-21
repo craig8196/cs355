@@ -9,6 +9,10 @@ public class Line extends AbstractShape {
 	private Point2D.Double p1 = new Point2D.Double(0.0, 0.0);
 	private Point2D.Double p2 = new Point2D.Double(0.0, 0.0);
 	
+	public Line() {
+		super();
+	}
+	
 	public Line(Color c, double x, double y) {
 		super(c, x, y);
 	}

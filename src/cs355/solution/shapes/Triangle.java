@@ -9,6 +9,10 @@ public class Triangle extends AbstractShape {
 	private Point2D.Double p2 = new Point2D.Double(0.0, 0.0);
 	private Point2D.Double p3 = new Point2D.Double(0.0, 0.0);
 	
+	public Triangle() {
+		super();
+	}
+	
 	public Triangle(Color c, double x, double y) {
 		super(c, x, y);
 	}

@@ -2,34 +2,23 @@ package cs355.solution;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Observable;
 import java.util.Observer;
 
 import cs355.GUIFunctions;
 import cs355.ViewRefresher;
-import cs355.solution.shapes.AbstractShape;
-import cs355.solution.shapes.Circle;
-import cs355.solution.shapes.Ellipse;
-import cs355.solution.shapes.Line;
-import cs355.solution.shapes.Rectangle;
-import cs355.solution.shapes.Square;
-import cs355.solution.shapes.Triangle;
-import cs355.solution.shapes.Utilities;
+import cs355.solution.shapes.AbstractShapeWrapper;
 
 
 public class View implements Observer, ViewRefresher {
 
-	private ViewModelWrapper model = null;
+	private ModelWrapper model = null;
 	private Controller controller = null;
 	private boolean initialized = false;
 	
-	public View(ViewModelWrapper m) {
+	public View(ModelWrapper m) {
 		this.model = m;
 		m.addObserver(this);
 	}
@@ -42,10 +31,10 @@ public class View implements Observer, ViewRefresher {
 	public void refreshView(Graphics2D g2d) {
 		if(!this.initialized) { // Set the color swatch the first time through.
 			this.setColorSwatch(this.controller.getCurrentColor());
-			GUIFunctions.setHScrollBarMin((int)Controller.worldXMin);
-			GUIFunctions.setHScrollBarMax((int)Controller.worldXMax);
-			GUIFunctions.setVScrollBarMin((int)Controller.worldYMin);
-			GUIFunctions.setVScrollBarMax((int)Controller.worldYMax);
+			GUIFunctions.setHScrollBarMin((int)ModelWrapper.WORLD_X_MIN);
+			GUIFunctions.setHScrollBarMax((int)ModelWrapper.WORLD_X_MAX);
+			GUIFunctions.setVScrollBarMin((int)ModelWrapper.WORLD_Y_MIN);
+			GUIFunctions.setVScrollBarMax((int)ModelWrapper.WORLD_Y_MAX);
 			this.updateHScrollBar();
 			this.updateVScrollBar();
 			this.initialized = true;
@@ -59,109 +48,37 @@ public class View implements Observer, ViewRefresher {
 			g2d.draw(p.third);
 			g2d.fill(p.third);
 		}
-		if(this.controller.isSelecting()) {
-			if(this.controller.getCurrentShapeHandle() != Model.INVALID_HANDLE) {
-				this.drawShapeHandles(g2d, this.controller.getCurrentShapeHandle());
+		AbstractShapeWrapper asw = this.controller.getCurrentShape();
+		if(asw.isSelected()) {
+			AffineTransform objToWorldToView = new AffineTransform(worldToView);
+			objToWorldToView.concatenate(asw.getObjectToWorldTransform());
+			g2d.setTransform(objToWorldToView);
+			g2d.setColor(asw.getSelectedColor());
+			g2d.draw(asw.getSelectedOutlineShape());
+			
+			for(Shape s: asw.getSelectedHandleShapes()) {
+				g2d.draw(s);
 			}
 		}
 	}
 	
 	public void updateHScrollBar() {
 		double scale = this.controller.getZoomScalingFactor();
-		double size = Controller.viewSizeX;
-		GUIFunctions.setHScrollBarKnob((int)(size/scale));
+		double size = ModelWrapper.VIEW_WIDTH;
 		GUIFunctions.setHScrollBarPosit((int)(this.controller.getViewTopLeftCorner().x));
+		GUIFunctions.setHScrollBarKnob((int)(size/scale));
 	}
 	
 	public void updateVScrollBar() {
 		double scale = this.controller.getZoomScalingFactor();
-		double size = Controller.viewSizeY;
-		GUIFunctions.setVScrollBarKnob((int)(size/scale));
+		double size = ModelWrapper.VIEW_HEIGHT;
 		GUIFunctions.setVScrollBarPosit((int)(this.controller.getViewTopLeftCorner().y));
+		GUIFunctions.setVScrollBarKnob((int)(size/scale));
 	}
 	
 	public void updateScrollBars() {
 		this.updateHScrollBar();
 		this.updateVScrollBar();
-	}
-	
-	public void drawShapeHandles(Graphics2D g2d, int handle) {
-		AbstractShape s = this.model.getShapeByHandle(handle);
-		Color selectedColor = new Color(255, 255, 0);
-		g2d.setColor(selectedColor);
-		AffineTransform a = s.getObjectToWorldTransform();
-		g2d.setTransform(a);
-		double hr = this.controller.getVisualHandleRadius();
-		double hd = hr*2.0;
-		if(s instanceof Line) {
-			Line l = (Line)s;
-			Point2D.Double p1 = l.getFirstPoint();
-			Point2D.Double p2 = l.getSecondPoint();
-			Ellipse2D.Double h1 = new Ellipse2D.Double(p1.x - hr, p1.y - hr, hd, hd);
-			Ellipse2D.Double h2 = new Ellipse2D.Double(p2.x - hr, p2.y - hr, hd, hd);
-			g2d.draw(h1);
-			g2d.draw(h2);
-		} else if(s instanceof Square) {
-			Square sq = (Square)s;
-			double halfSide = sq.getHalfSide();
-			double side = sq.getSide();
-			Ellipse2D.Double handleAngle = new Ellipse2D.Double(halfSide + hd, -hr, hd, hd);
-			Rectangle2D.Double outline = new Rectangle2D.Double(-halfSide, -halfSide, side, side);
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-halfSide, -halfSide), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(halfSide, -halfSide), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-halfSide, halfSide), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(halfSide, halfSide), hr));
-			g2d.draw(handleAngle);
-			g2d.draw(outline);
-		} else if(s instanceof Rectangle) {
-			Rectangle r = (Rectangle)s;
-			double hw = r.getHalfWidth();
-			double hh = r.getHalfHeight();
-			Ellipse2D.Double handleAngle = new Ellipse2D.Double(hw + hd, -hr, hd, hd);
-			Rectangle2D.Double outline = new Rectangle2D.Double(-hw, -hh, hw*2.0, hh*2.0);
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-			g2d.draw(handleAngle);
-			g2d.draw(outline);
-		} else if(s instanceof Circle) {
-			Circle c = (Circle)s;
-			double radius = c.getRadius();
-			double hw = radius;
-			double hh = radius;
-			Ellipse2D.Double outline = new Ellipse2D.Double(-radius, -radius, radius*2.0, radius*2.0);
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-			g2d.draw(outline);
-		} else if(s instanceof Ellipse) {
-			Ellipse e = (Ellipse)s;
-			double hw = e.getRadiusX();
-			double hh = e.getRadiusY();
-			Ellipse2D.Double handleAngle = new Ellipse2D.Double(hw + hd, -hr, hd, hd);
-			Ellipse2D.Double outline = new Ellipse2D.Double(-hw, -hh, hw*2.0, hh*2.0);
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-			g2d.draw(handleAngle);
-			g2d.draw(outline);
-		} else if(s instanceof Triangle) {
-			Triangle t = (Triangle)s;
-			Point2D.Double p1 = t.getFirstPoint();
-			Point2D.Double p2 = t.getSecondPoint();
-			Point2D.Double p3 = t.getThirdPoint();
-			int maxX = Utilities.max(t.getXCoords());
-			Point2D.Double vector = new Point2D.Double(maxX + hd, 0);
-			Polygon outline = new Polygon(t.getXCoords(), t.getYCoords(), 3);
-			g2d.draw(Utilities.createCircleAtEndOfVector(p1, hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(p2, hr));
-			g2d.draw(Utilities.createCircleAtEndOfVector(p3, hr));
-			g2d.draw(outline);
-			g2d.draw(Utilities.createCircleAtEndOfVector(vector, hr));
-		}
 	}
 	
 	public void update() {

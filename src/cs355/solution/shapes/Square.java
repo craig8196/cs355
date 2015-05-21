@@ -7,6 +7,10 @@ public class Square extends AbstractShape {
 
 	private double halfSide = 0.0;
 	
+	public Square() {
+		super();
+	}
+	
 	public Square(Color c, double x, double y) {
 		super(c, x, y);
 	}
