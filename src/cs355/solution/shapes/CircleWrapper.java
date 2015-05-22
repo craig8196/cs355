@@ -1,6 +1,7 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
@@ -20,6 +21,7 @@ public class CircleWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public void setFirstTwoPoints(Double p1, Double p2) {
+		AffineTransform oToW = this.getObjectToWorldTransform();
 		this.model.updateShape(this.id, (s)->{
 			Circle c = (Circle)s;
 			double deltaX = p2.x - p1.x;
@@ -27,7 +29,9 @@ public class CircleWrapper extends AbstractShapeWrapper {
 			double radius = Math.min(Math.abs(deltaX), Math.abs(deltaY))/2.0;
 			double cx = Math.min(p1.x, p1.x + radius*2.0*Utilities.signOf(deltaX)) + radius;
 			double cy = Math.min(p1.y, p1.y + radius*2.0*Utilities.signOf(deltaY)) + radius;
-			c.setCenter(cx, cy);
+			Double c2 = new Double();
+			oToW.transform(new Double(cx, cy), c2);
+			c.setCenter(c2.x, c2.y);
 			c.setRadius(radius);
 		});
 	}

@@ -1,6 +1,7 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
@@ -20,6 +21,7 @@ public class SquareWrapper extends AbstractShapeWrapper {
 	
 	@Override
 	public void setFirstTwoPoints(Double p1, Double p2) {
+		AffineTransform oToW = this.getObjectToWorldTransform();
 		this.model.updateShape(this.id, (s)->{
 			Square sq = (Square)s;
 			double deltaX = p2.x - p1.x;
@@ -32,7 +34,9 @@ public class SquareWrapper extends AbstractShapeWrapper {
 			}
 			double x = Math.min(p1.x, p1.x + side*Utilities.signOf(deltaX)) + side/2.0;
 			double y = Math.min(p1.y, p1.y + side*Utilities.signOf(deltaY)) + side/2.0;
-			sq.setCenter(x, y);
+			Double c = new Double();
+			oToW.transform(new Double(x, y), c);
+			sq.setCenter(c.x, c.y);
 			sq.setSide(side);
 		});
 	}

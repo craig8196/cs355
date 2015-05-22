@@ -1,6 +1,7 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
@@ -20,13 +21,16 @@ public class EllipseWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public void setFirstTwoPoints(Double p1, Double p2) {
+		AffineTransform oToW = this.getObjectToWorldTransform();
 		this.model.updateShape(this.id, (s)->{
 			Ellipse e = (Ellipse)s;
 			double rx = Math.abs(p1.x - p2.x)/2.0;
 			double ry = Math.abs(p1.y - p2.y)/2.0;
 			double cx = (p1.x + p2.x)/2.0;
 			double cy = (p1.y + p2.y)/2.0;
-			e.setCenter(cx, cy);
+			Double c = new Double();
+			oToW.transform(new Double(cx, cy), c);
+			e.setCenter(c.x, c.y);
 			e.setRadiusX(rx);
 			e.setRadiusY(ry);
 		});

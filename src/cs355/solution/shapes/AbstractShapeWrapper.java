@@ -47,8 +47,14 @@ public abstract class AbstractShapeWrapper {
 		Point2D.Double center = this.model.getShapeById(this.id).getCenter();
 		this.originalCenter = new Point2D.Double(center.x, center.y);
 		Iterable<Point2D.Double> hc = this.getResizeHandleCenters();
-		this.nearestResize = Utilities.getNearestPoint(p, hc);
-		this.furthestResize = Utilities.getFurthestPoint(p, hc);
+		AffineTransform objToWorld = this.getObjectToWorldTransform();
+		AffineTransform worldToObject = this.getWorldToObjectTransform();
+		Point2D.Double pObj = new Point2D.Double();
+		worldToObject.transform(p, pObj);
+		Point2D.Double nearest = Utilities.getNearestPoint(pObj, hc);
+		objToWorld.transform(nearest, this.nearestResize);
+		Point2D.Double furthest = Utilities.getFurthestPoint(pObj, hc);
+		objToWorld.transform(furthest, this.furthestResize);
 	}
 	
 	public void setAngle(double angle) {
@@ -90,7 +96,7 @@ public abstract class AbstractShapeWrapper {
 		Point2D.Double md = this.mouseDown;
 		Point2D.Double diff = new Point2D.Double(p.x - md.x, p.y - md.y);
 		Point2D.Double newNearest = new Point2D.Double(this.nearestResize.x + diff.x, this.nearestResize.y + diff.y);
-		this.setFirstTwoPoints(this.furthestResize, newNearest);
+		this.setFirstTwoPointsWorld(this.furthestResize, newNearest);
 	}
 	
 	public void setSelected(boolean s) {
@@ -151,9 +157,9 @@ public abstract class AbstractShapeWrapper {
 		return result;
 	}
 	
-	public abstract void setFirstTwoPoints(Point2D.Double p1, Point2D.Double p2);
+	protected abstract void setFirstTwoPoints(Point2D.Double p1, Point2D.Double p2);
 	
-	public abstract void setFirstThreePoints(Point2D.Double p1, Point2D.Double p2, Point2D.Double p3);
+	protected abstract void setFirstThreePoints(Point2D.Double p1, Point2D.Double p2, Point2D.Double p3);
 	
 	public abstract Shape getGraphicalShape();
 	
@@ -220,6 +226,26 @@ public abstract class AbstractShapeWrapper {
 		this.resizing = false;
 		this.translating = false;
 		this.rotating = false;
+	}
+	
+	public void setFirstTwoPointsWorld(Point2D.Double p1, Point2D.Double p2) {
+		Point2D.Double np1 = new Point2D.Double();
+		Point2D.Double np2 = new Point2D.Double();
+		AffineTransform wToO = this.getWorldToObjectTransform();
+		wToO.transform(p1, np1);
+		wToO.transform(p2, np2);
+		this.setFirstTwoPoints(np1, np2);;
+	}
+	
+	public void setFirstThreePointsWorld(Point2D.Double p1, Point2D.Double p2, Point2D.Double p3) {
+		Point2D.Double np1 = new Point2D.Double();
+		Point2D.Double np2 = new Point2D.Double();
+		Point2D.Double np3 = new Point2D.Double();
+		AffineTransform wToO = this.getWorldToObjectTransform();
+		wToO.transform(p1, np1);
+		wToO.transform(p2, np2);
+		wToO.transform(p3, np3);
+		this.setFirstThreePoints(np1, np2, np3);
 	}
 	
 }

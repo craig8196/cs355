@@ -28,7 +28,7 @@ public abstract class AbstractShape {
 	}
 	
 	public Point2D.Double getCenter() {
-		return this.center;
+		return new Point2D.Double(this.center.x, this.center.y);
 	}
 	
 	public void setColor(Color c) {

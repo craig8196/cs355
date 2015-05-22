@@ -299,7 +299,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		} else {
 			if(this.selectedShapeType != ShapeType.TRIANGLE && this.mouseDown) {
 				this.secondPoint = p;
-				this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
+				this.currentShape.setFirstTwoPointsWorld(this.firstPoint, this.secondPoint);
 			}
 		}
 	}
@@ -313,9 +313,9 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 			if(this.selectedShapeType == ShapeType.TRIANGLE) {
 				if(this.clickCount == 1) {
 					this.secondPoint = p;
-					this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
+					this.currentShape.setFirstTwoPointsWorld(this.firstPoint, this.secondPoint);
 				} else if(this.clickCount == 2) {
-					this.currentShape.setFirstThreePoints(this.firstPoint, this.secondPoint, p);
+					this.currentShape.setFirstThreePointsWorld(this.firstPoint, this.secondPoint, p);
 				}
 			}
 		}
@@ -355,12 +355,12 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 					this.firstPoint = p;
 					this.currentShape = this.model.addShape(this.selectedShapeType);
 					this.currentShape.setColor(this.currentColor);
-					this.currentShape.setFirstTwoPoints(p, p);
+					this.currentShape.setFirstTwoPointsWorld(p, p);
 				} else if(this.clickCount == 1) {
 					this.secondPoint = p;
-					this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
+					this.currentShape.setFirstTwoPointsWorld(this.firstPoint, this.secondPoint);
 				} else if(this.clickCount == 2) {
-					this.currentShape.setFirstThreePoints(this.firstPoint, this.secondPoint, p);
+					this.currentShape.setFirstThreePointsWorld(this.firstPoint, this.secondPoint, p);
 				}
 				this.clickCount++;
 				if(this.clickCount >= 3) {
@@ -390,7 +390,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 				this.firstPoint = p;
 				this.currentShape = this.model.addShape(this.selectedShapeType);
 				this.currentShape.setColor(this.currentColor);
-				this.currentShape.setFirstTwoPoints(p, p);
+				this.currentShape.setFirstTwoPointsWorld(p, p);
 			}
 		}
 	}
@@ -402,7 +402,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		} else {
 			if(this.mouseDown) {
 				this.secondPoint = p;
-				this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
+				this.currentShape.setFirstTwoPointsWorld(this.firstPoint, this.secondPoint);
 			}
 			this.mouseDown = false;
 		}
