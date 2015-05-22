@@ -17,6 +17,9 @@ public class Model extends Observable {
 	public Model() {}
 	
 	public int addShape(AbstractShape s) {
+		if(s == null) {
+			return Model.INVALID_ID;
+		}
 		this.shapesList.add(s);
 		this.setChanged();
 		this.notifyObservers();

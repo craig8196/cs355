@@ -36,8 +36,7 @@ public class View implements Observer, ViewRefresher {
 			GUIFunctions.setHScrollBarMax((int)ModelWrapper.WORLD_X_MAX);
 			GUIFunctions.setVScrollBarMin((int)ModelWrapper.WORLD_Y_MIN);
 			GUIFunctions.setVScrollBarMax((int)ModelWrapper.WORLD_Y_MAX);
-			this.updateHScrollBar();
-			this.updateVScrollBar();
+			this.updateScrollBars();
 			this.initialized = true;
 		}
 		float width = 1.0f/(float)this.controller.getZoomScalingFactor();
@@ -72,15 +71,19 @@ public class View implements Observer, ViewRefresher {
 	public void updateHScrollBar() {
 		double scale = this.controller.getZoomScalingFactor();
 		double size = ModelWrapper.VIEW_WIDTH;
+		GUIFunctions.setHScrollBarKnob((int)(size/scale));
 		GUIFunctions.setHScrollBarPosit((int)(this.controller.getViewTopLeftCorner().x));
 		GUIFunctions.setHScrollBarKnob((int)(size/scale));
+		GUIFunctions.setHScrollBarPosit((int)(this.controller.getViewTopLeftCorner().x));
 	}
 	
 	public void updateVScrollBar() {
 		double scale = this.controller.getZoomScalingFactor();
 		double size = ModelWrapper.VIEW_HEIGHT;
+		GUIFunctions.setVScrollBarKnob((int)(size/scale));
 		GUIFunctions.setVScrollBarPosit((int)(this.controller.getViewTopLeftCorner().y));
 		GUIFunctions.setVScrollBarKnob((int)(size/scale));
+		GUIFunctions.setVScrollBarPosit((int)(this.controller.getViewTopLeftCorner().y));
 	}
 	
 	public void updateScrollBars() {

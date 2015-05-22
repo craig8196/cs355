@@ -209,16 +209,16 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 
 	@Override
 	public void hScrollbarChanged(int value) {
-		this.viewportTopLeft.x = (double)value;
 		if(!this.updatingZoom) {
+			this.viewportTopLeft.x = (double)value;
 			this.view.update();
 		}
 	}
 
 	@Override
 	public void vScrollbarChanged(int value) {
-		this.viewportTopLeft.y = (double)value;
 		if(!this.updatingZoom) {
+			this.viewportTopLeft.y = (double)value;
 			this.view.update();
 		}
 	}
