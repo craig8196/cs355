@@ -2,7 +2,6 @@ package cs355.solution.shapes;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
 
 public class Utilities {
 	public static double dot(Point2D.Double p1, Point2D.Double p2) {
@@ -71,7 +70,7 @@ public class Utilities {
 		}
 	}
 
-	public static boolean isPointNearPoint(Double p1, Double p2, double radius) {
+	public static boolean isPointNearPoint(Point2D.Double p1, Point2D.Double p2, double radius) {
 		double dx = p1.x - p2.x;
 		double dy = p1.y - p2.y;
 		if(dx*dx + dy*dy <= radius*radius) {
@@ -79,6 +78,36 @@ public class Utilities {
 		} else {
 			return false;
 		}
+	}
+
+	public static Point2D.Double getNearestPoint(Point2D.Double p, Iterable<Point2D.Double> hc) {
+		Point2D.Double nearest = null;
+		double smallest = Double.MAX_VALUE;
+		for(Point2D.Double h: hc) {
+			double dx = h.x - p.x;
+			double dy = h.y - p.y;
+			double distSquared = dx*dx + dy*dy;
+			if(distSquared < smallest) {
+				nearest = h;
+				smallest = distSquared;
+			}
+		}
+		return nearest;
+	}
+	
+	public static Point2D.Double getFurthestPoint(Point2D.Double p, Iterable<Point2D.Double> hc) {
+		Point2D.Double furthest = null;
+		double largest = -Double.MAX_VALUE;
+		for(Point2D.Double h: hc) {
+			double dx = h.x - p.x;
+			double dy = h.y - p.y;
+			double distSquared = dx*dx + dy*dy;
+			if(distSquared > largest) {
+				furthest = h;
+				largest = distSquared;
+			}
+		}
+		return furthest;
 	}
 	
 }

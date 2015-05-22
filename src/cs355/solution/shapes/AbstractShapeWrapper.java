@@ -17,6 +17,8 @@ public abstract class AbstractShapeWrapper {
 	protected double originalAngle = 0.0;
 	protected Point2D.Double originalCenter = new Point2D.Double(0.0, 0.0);
 	protected Point2D.Double mouseDown = new Point2D.Double(0.0, 0.0);
+	protected Point2D.Double nearestResize = new Point2D.Double(0.0, 0.0);
+	protected Point2D.Double furthestResize = new Point2D.Double(0.0, 0.0);
 	private boolean selected = false;
 	private boolean translating = false;
 	private boolean rotating = false;
@@ -42,6 +44,9 @@ public abstract class AbstractShapeWrapper {
 		this.originalAngle = this.model.getShapeById(this.id).getAngle();
 		Point2D.Double center = this.model.getShapeById(this.id).getCenter();
 		this.originalCenter = new Point2D.Double(center.x, center.y);
+		Iterable<Point2D.Double> hc = this.getResizeHandleCenters();
+		this.nearestResize = Utilities.getNearestPoint(p, hc);
+		this.furthestResize = Utilities.getFurthestPoint(p, hc);
 	}
 	
 	public void setAngle(double angle) {
@@ -81,7 +86,10 @@ public abstract class AbstractShapeWrapper {
 	}
 	
 	public void resize(Point2D.Double p) {
-		// TODO
+		Point2D.Double md = this.mouseDown;
+		Point2D.Double diff = new Point2D.Double(p.x - md.x, p.y - md.y);
+		Point2D.Double newNearest = new Point2D.Double(this.nearestResize.x + diff.x, this.nearestResize.y + diff.y);
+		this.setFirstTwoPoints(this.furthestResize, newNearest);
 	}
 	
 	public void setSelected(boolean s) {
