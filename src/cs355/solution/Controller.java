@@ -20,7 +20,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	
 	private Color currentColor = new Color(128, 128, 128);
 	private ShapeType selectedShapeType = ShapeType.IMAGINARY;
-	private AbstractShapeWrapper currentShape = new ImaginaryShapeWrapper();
+	private AbstractShapeWrapper currentShape = null;
 	
 	// Used for creating shapes, tracking clicks, etc.
 	private int clickCount = 0;
@@ -43,6 +43,14 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private int currentZoomLevelIndex = 2;
 	private Point2D.Double viewportTopLeft = new Point2D.Double(0.0, 0.0);
 	private boolean updatingZoom = false;
+	
+	public double getToleranceInWorldCoords() {
+		return ModelWrapper.TOLERANCE/this.getZoomScalingFactor();
+	}
+	
+	public double getHandleRadiusInWorldCoords() {
+		return ModelWrapper.HANDLE_RADIUS/this.getZoomScalingFactor();
+	}
 	
 	public double getZoomScalingFactor() {
 		return this.zoomLevels[this.currentZoomLevelIndex];
@@ -75,6 +83,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public Controller(View v, ModelWrapper m) {
 		this.model = m;
 		this.view = v;
+		this.currentShape = new ImaginaryShapeWrapper(m.model, Model.INVALID_ID);
 	}
 	
 	@Override
@@ -291,32 +300,10 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mouseDragged(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-//			if(this.selectingTranslating) {
-//				this.currentShape.setTranslatingSecondPoint(p);
-//				this.model.updateShape(this.currentShapeHandle, (s)->{
-//					Point2D.Double c = this.selectingOriginalOrigin;
-//					Point2D.Double md = this.selectingMouseDown;
-//					Point2D.Double diff = new Point2D.Double(p.x - md.x, p.y - md.y);
-//					if(s instanceof Line) {
-//						Line l = (Line)s;
-//						l.setFirstPoint(diff.x + this.selectingLineP1.x, diff.y + this.selectingLineP1.y);
-//						l.setSecondPoint(diff.x + this.selectingLineP2.x, diff.y + this.selectingLineP2.y);
-//					} else {
-//						s.setCenter(diff.x + c.x, diff.y + c.y);
-//					}
-//				});
-//			} else if(this.selectingRotating) {
-//				this.model.updateShape(this.currentShapeHandle, (s)->{
-//					AffineTransform a = s.getWorldToObjectTransform();
-//					Point2D.Double start = new Point2D.Double();
-//					Point2D.Double end = new Point2D.Double();
-//					a.transform(this.selectingMouseDown, start);
-//					a.transform(p, end);
-//					double angleDelta = Math.atan2(end.y, end.x) - Math.atan2(start.y, start.x);
-////					System.out.println("rotating");
-//					s.setAngle(this.selectingOriginalAngle + angleDelta);
-//				});
-//			}
+			System.out.println(this.currentShape.isSelected());
+			if(this.currentShape.isSelected()) {
+				this.currentShape.setMouseUp(p);
+			}
 		} else {
 			if(this.selectedShapeType != ShapeType.TRIANGLE && this.mouseDown) {
 				this.secondPoint = p;
@@ -331,7 +318,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		if(this.selecting) {
 			
 		} else {
-			if(this.selectedShapeType != ShapeType.TRIANGLE) {
+			if(this.selectedShapeType == ShapeType.TRIANGLE) {
 				if(this.clickCount == 1) {
 					this.secondPoint = p;
 					this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
@@ -346,34 +333,38 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mouseClicked(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-//			if((this.model.getShapeByHandle(this.currentShapeHandle).isPointInShape(p, Controller.TOLERANCE) ||
-//			    this.model.hitShapeHandle(this.currentShapeHandle, p) ||
-//			    this.model.hitShapeRotateHandle(this.currentShapeHandle, p, this.getVisualHandleRadius()) )) {
-//					return;
-//			}
-//			
-//			int shapeHandle = this.model.hitShape(p.x, p.y);
-//			boolean updateView = false;
-//			
-//			if(this.currentShapeHandle != shapeHandle){
-//				updateView = true;
-//			}
-//			
-//			this.currentShapeHandle = shapeHandle;
-//			
-//			if(shapeHandle != Model.INVALID_HANDLE) {
-//				this.currentColor = this.model.getColorByHandle(shapeHandle);
-//				this.view.setColorSwatch(this.currentColor);
-//			}
-//			
-//			if(updateView) {
-//				this.view.update();
-//			}
+			double handleRadius = this.getHandleRadiusInWorldCoords();
+			double tolerance = this.getToleranceInWorldCoords();
+			
+			if( // If it hit the already selected shape
+				this.currentShape.isSelected() && 
+				(this.currentShape.hitShape(p, tolerance) ||
+				this.currentShape.hitRotateHandle(p, handleRadius) ||
+				this.currentShape.hitResizeHandle(p, handleRadius))
+			) {
+				return;
+			}
+			
+			this.currentShape = this.model.hitShape(p, this.getToleranceInWorldCoords());
+			
+			if(!(this.currentShape instanceof ImaginaryShapeWrapper)) { // Hit shape.
+				this.currentColor = this.currentShape.getColor();
+				this.view.setColorSwatch(this.currentColor);
+				this.view.update();
+				this.currentShape.setSelected(true);
+				System.out.println("Setting shape as selected.");
+			} else { // Clicked on not a shape.
+				this.currentShape.setSelected(false);
+			}
+			
+			this.view.update();
 		} else {
 			if(this.selectedShapeType == ShapeType.TRIANGLE) {
 				if(this.clickCount == 0) {
 					this.firstPoint = p;
 					this.currentShape = this.model.addShape(this.selectedShapeType);
+					this.currentShape.setColor(this.currentColor);
+					this.currentShape.setFirstTwoPoints(p, p);
 				} else if(this.clickCount == 1) {
 					this.secondPoint = p;
 					this.currentShape.setFirstTwoPoints(this.firstPoint, this.secondPoint);
@@ -391,27 +382,24 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mousePressed(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-//			if(this.currentShapeHandle != Model.INVALID_HANDLE) {
-//				this.selectingMouseDown = p;
-//				AbstractShape as = this.model.getShapeByHandle(this.currentShapeHandle);
-//				this.selectingOriginalOrigin = as.getCenter();
-//				this.selectingOriginalAngle = as.getAngle();
-//				if(as instanceof Line) {
-//					Line l = (Line)as;
-//					this.selectingLineP1 = l.getFirstPoint();
-//					this.selectingLineP2 = l.getSecondPoint();
-//				}
-//				if(this.model.getShapeByHandle(this.currentShapeHandle).isPointInShape(p, Controller.TOLERANCE)) {
-//					this.selectingTranslating = true;
-//				} else if(this.model.hitShapeRotateHandle(this.currentShapeHandle, p, this.getVisualHandleRadius())) {
-//					this.selectingRotating = true;
-//				}
-//			}
+			if(this.currentShape.isSelected()) {
+				this.currentShape.setMouseDown(p); // Save the current state.
+				
+				if(this.currentShape.hitResizeHandle(p, this.getHandleRadiusInWorldCoords())) {
+					this.currentShape.setResizing(true);
+				} else if(this.currentShape.hitShape(p, this.getToleranceInWorldCoords())) {
+					this.currentShape.setTranslating(true);
+				} else if(this.currentShape.hitRotateHandle(p, this.getHandleRadiusInWorldCoords())) {
+					this.currentShape.setRotating(true);
+				}
+			}
 		} else {
 			if(this.selectedShapeType != ShapeType.TRIANGLE) {
 				this.mouseDown = true;
 				this.firstPoint = p;
 				this.currentShape = this.model.addShape(this.selectedShapeType);
+				this.currentShape.setColor(this.currentColor);
+				this.currentShape.setFirstTwoPoints(p, p);
 			}
 		}
 	}
@@ -419,11 +407,13 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mouseReleased(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-//			if(this.selectingTranslating) {
-//				this.selectingTranslating = false;
-//			} else if(this.selectingRotating) {
-//				this.selectingRotating = false;
-//			}
+			if(this.currentShape.isTranslating()) {
+				this.currentShape.setTranslating(false);
+			} else if(this.currentShape.isRotating()) {
+				this.currentShape.setRotating(false);
+			} else if(this.currentShape.isTranslating()) {
+				this.currentShape.setTranslating(false);
+			}
 		} else {
 			if(this.mouseDown) {
 				this.secondPoint = p;
@@ -444,9 +434,5 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public AbstractShapeWrapper getCurrentShape() {
 		return this.currentShape;
 	}
-	
-	public double getVisualHandleRadius() {
-		return 10.0;
-	}
-	
+
 }

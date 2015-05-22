@@ -2,6 +2,7 @@ package cs355.solution.shapes;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 
 public class Utilities {
 	public static double dot(Point2D.Double p1, Point2D.Double p2) {
@@ -60,6 +61,24 @@ public class Utilities {
 		}
 		
 		return result;
+	}
+	
+	public static double signOf(double x) {
+		if(x >= 0.0) {
+			return 1.0;
+		} else {
+			return -1.0;
+		}
+	}
+
+	public static boolean isPointNearPoint(Double p1, Double p2, double radius) {
+		double dx = p1.x - p2.x;
+		double dy = p1.y - p2.y;
+		if(dx*dx + dy*dy <= radius*radius) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }

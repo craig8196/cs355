@@ -23,9 +23,9 @@ public class Model extends Observable {
 		return this.getFrontShapeId();
 	}
 	
-	public int hitShape(double x, double y, double tolerance) {
+	public int hitShape(Point2D.Double p, double tolerance) {
 		for(int i = this.shapesList.size() - 1; i >= 0; i--) {
-			if(this.shapesList.get(i).isPointInShape(new Point2D.Double(x, y), tolerance)) {
+			if(this.shapesList.get(i).isPointInShape(p, tolerance)) {
 				return i;
 			}
 		}

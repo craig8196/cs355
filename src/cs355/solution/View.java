@@ -50,13 +50,18 @@ public class View implements Observer, ViewRefresher {
 		}
 		AbstractShapeWrapper asw = this.controller.getCurrentShape();
 		if(asw.isSelected()) {
+			System.out.println("Drawing selected.");
 			AffineTransform objToWorldToView = new AffineTransform(worldToView);
 			objToWorldToView.concatenate(asw.getObjectToWorldTransform());
 			g2d.setTransform(objToWorldToView);
 			g2d.setColor(asw.getSelectedColor());
-			g2d.draw(asw.getSelectedOutlineShape());
+			Shape outline = asw.getSelectedOutlineShape();
+			if(outline != null) {
+				g2d.draw(outline);
+			}
 			
 			for(Shape s: asw.getSelectedHandleShapes()) {
+				System.out.println(s);
 				g2d.draw(s);
 			}
 		}

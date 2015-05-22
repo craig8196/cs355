@@ -64,6 +64,7 @@ public class Line extends AbstractShape {
 	
 	@Override
 	public boolean isPointInShape(Point2D.Double p, double tolerance) {
+		System.out.println("here");
 		Point2D.Double perpVector = new Point2D.Double(this.p1.y - this.p2.y, this.p2.x - this.p1.x);
 		double length = Math.sqrt(perpVector.x*perpVector.x + perpVector.y*perpVector.y);
 		double epsilon = 10e-5;
