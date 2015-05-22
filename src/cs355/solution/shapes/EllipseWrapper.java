@@ -7,7 +7,6 @@ import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class EllipseWrapper extends AbstractShapeWrapper {
 
@@ -17,23 +16,6 @@ public class EllipseWrapper extends AbstractShapeWrapper {
 	
 	private Ellipse getEllipse() {
 		return (Ellipse)this.model.getShapeById(this.id);
-	}
-
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		double hd = hr*2.0;
-		Ellipse e = this.getEllipse();
-		double hw = e.getRadiusX();
-		double hh = e.getRadiusY();
-		Ellipse2D.Double handleAngle = new Ellipse2D.Double(hw + hd, -hr, hd, hd);
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-		result.add(handleAngle);
-		return result;
 	}
 
 	@Override
@@ -65,14 +47,21 @@ public class EllipseWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public Double getRotateHandleCenter(double radius) {
-		// TODO Auto-generated method stub
-		return null;
+		Ellipse e = this.getEllipse();
+		return new Double(e.getRadiusX() + radius*2.0, 0.0);
 	}
 
 	@Override
 	public Iterable<Double> getResizeHandleCenters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Double> result = new ArrayList<Double>();
+		Ellipse e = this.getEllipse();
+		double hw = e.getRadiusX();
+		double hh = e.getRadiusY();
+		result.add(new Point2D.Double(-hw, -hh));
+		result.add(new Point2D.Double(-hw, hh));
+		result.add(new Point2D.Double(hw, -hh));
+		result.add(new Point2D.Double(hw, hh));
+		return result;
 	}
 
 }

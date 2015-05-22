@@ -1,14 +1,12 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class SquareWrapper extends AbstractShapeWrapper {
 
@@ -20,22 +18,6 @@ public class SquareWrapper extends AbstractShapeWrapper {
 		return (Square) this.model.getShapeById(this.id);
 	}
 	
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		double hd = hr*2.0;
-		Square sq = this.getSquare();
-		double halfSide = sq.getHalfSide();
-		Ellipse2D.Double handleAngle = new Ellipse2D.Double(halfSide + hd, -hr, hd, hd);
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-halfSide, -halfSide), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(halfSide, -halfSide), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-halfSide, halfSide), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(halfSide, halfSide), hr));
-		result.add(handleAngle);
-		return result;
-	}
-
 	@Override
 	public void setFirstTwoPoints(Double p1, Double p2) {
 		this.model.updateShape(this.id, (s)->{
@@ -70,14 +52,21 @@ public class SquareWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public Double getRotateHandleCenter(double radius) {
-		// TODO Auto-generated method stub
-		return null;
+		Square sq = this.getSquare();
+		double halfSide = sq.getHalfSide();
+		return new Double(halfSide + radius*2.0, 0.0);
 	}
 
 	@Override
 	public Iterable<Double> getResizeHandleCenters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Double> result = new ArrayList<Double>();
+		Square sq = this.getSquare();
+		double halfSide = sq.getHalfSide();
+		result.add(new Point2D.Double(-halfSide, -halfSide));
+		result.add(new Point2D.Double(halfSide, -halfSide));
+		result.add(new Point2D.Double(-halfSide, halfSide));
+		result.add(new Point2D.Double(halfSide, halfSide));
+		return result;
 	}
 
 }

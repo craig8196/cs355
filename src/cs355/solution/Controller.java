@@ -31,13 +31,6 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	// Used for selection, translation, and rotation.
 	private boolean selecting = false;
 	
-//	// TODO move this to the wrapper classes
-//	private Point2D.Double selectingOriginalOrigin = null;
-//	private Point2D.Double selectingMouseDown = null;
-//	private double selectingOriginalAngle = 0.0;
-//	private Point2D.Double selectingLineP1 = null;
-//	private Point2D.Double selectingLineP2 = null;
-	
 	// Zooming in and out.
 	private double[] zoomLevels = { 0.25, 0.5, 1.0, 2.0, 4.0 };
 	private int currentZoomLevelIndex = 2;
@@ -300,7 +293,6 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mouseDragged(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-			System.out.println(this.currentShape.isSelected());
 			if(this.currentShape.isSelected()) {
 				this.currentShape.setMouseUp(p);
 			}
@@ -345,14 +337,13 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 				return;
 			}
 			
-			this.currentShape = this.model.hitShape(p, this.getToleranceInWorldCoords());
+			this.currentShape = this.model.hitShape(p, tolerance);
 			
 			if(!(this.currentShape instanceof ImaginaryShapeWrapper)) { // Hit shape.
 				this.currentColor = this.currentShape.getColor();
 				this.view.setColorSwatch(this.currentColor);
 				this.view.update();
 				this.currentShape.setSelected(true);
-				System.out.println("Setting shape as selected.");
 			} else { // Clicked on not a shape.
 				this.currentShape.setSelected(false);
 			}
@@ -407,13 +398,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void mouseReleased(MouseEvent e) {
 		Point2D.Double p = this.getWorldPointFromClick(e);
 		if(this.selecting) {
-			if(this.currentShape.isTranslating()) {
-				this.currentShape.setTranslating(false);
-			} else if(this.currentShape.isRotating()) {
-				this.currentShape.setRotating(false);
-			} else if(this.currentShape.isTranslating()) {
-				this.currentShape.setTranslating(false);
-			}
+			this.currentShape.resetAllSelectingFeatures();
 		} else {
 			if(this.mouseDown) {
 				this.secondPoint = p;

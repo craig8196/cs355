@@ -1,14 +1,12 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class RectangleWrapper extends AbstractShapeWrapper {
 
@@ -18,23 +16,6 @@ public class RectangleWrapper extends AbstractShapeWrapper {
 	
 	private Rectangle getRectangle() {
 		return (Rectangle)this.model.getShapeById(this.id);
-	}
-
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		double hd = hr*2.0;
-		Rectangle r = this.getRectangle();
-		double hw = r.getHalfWidth();
-		double hh = r.getHalfHeight();
-		Ellipse2D.Double handleAngle = new Ellipse2D.Double(hw + hd, -hr, hd, hd);
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-		result.add(handleAngle);
-		return result;
 	}
 
 	@Override
@@ -64,14 +45,21 @@ public class RectangleWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public Double getRotateHandleCenter(double radius) {
-		// TODO Auto-generated method stub
-		return null;
+		Rectangle r = this.getRectangle();
+		return new Double(r.getHalfWidth() + radius*2.0, 0.0);
 	}
 
 	@Override
 	public Iterable<Double> getResizeHandleCenters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Double> result = new ArrayList<Double>();
+		Rectangle r = this.getRectangle();
+		double hw = r.getHalfWidth();
+		double hh = r.getHalfHeight();
+		result.add(new Point2D.Double(-hw, -hh));
+		result.add(new Point2D.Double(-hw, hh));
+		result.add(new Point2D.Double(hw, -hh));
+		result.add(new Point2D.Double(hw, hh));
+		return result;
 	}
 
 }

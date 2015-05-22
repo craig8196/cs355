@@ -7,7 +7,6 @@ import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class CircleWrapper extends AbstractShapeWrapper {
 
@@ -17,21 +16,6 @@ public class CircleWrapper extends AbstractShapeWrapper {
 	
 	private Circle getCircle() {
 		return (Circle)this.model.getShapeById(this.id);
-	}
-
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		Circle c = this.getCircle();
-		double radius = c.getRadius();
-		double hw = radius;
-		double hh = radius;
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(-hw, hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, -hh), hr));
-		result.add(Utilities.createCircleAtEndOfVector(new Point2D.Double(hw, hh), hr));
-		return result;
 	}
 
 	@Override
@@ -62,14 +46,21 @@ public class CircleWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public Double getRotateHandleCenter(double radius) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Iterable<Double> getResizeHandleCenters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Double> result = new ArrayList<Double>();
+		Circle c = this.getCircle();
+		double radius = c.getRadius();
+		double hw = radius;
+		double hh = radius;
+		result.add(new Point2D.Double(-hw, -hh));
+		result.add(new Point2D.Double(-hw, hh));
+		result.add(new Point2D.Double(hw, -hh));
+		result.add(new Point2D.Double(hw, hh));
+		return result;
 	}
 	
 }

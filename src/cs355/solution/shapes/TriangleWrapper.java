@@ -7,7 +7,6 @@ import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class TriangleWrapper extends AbstractShapeWrapper {
 
@@ -17,24 +16,6 @@ public class TriangleWrapper extends AbstractShapeWrapper {
 	
 	private Triangle getTriangle() {
 		return (Triangle)this.model.getShapeById(this.id);
-	}
-
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		double hd = hr*2.0;
-		Triangle t = this.getTriangle();
-		Point2D.Double p1 = t.getFirstPoint();
-		Point2D.Double p2 = t.getSecondPoint();
-		Point2D.Double p3 = t.getThirdPoint();
-		int maxX = Utilities.max(t.getXCoords());
-		Point2D.Double vector = new Point2D.Double(maxX + hd, 0);
-		result.add(Utilities.createCircleAtEndOfVector(p1, hr));
-		result.add(Utilities.createCircleAtEndOfVector(p2, hr));
-		result.add(Utilities.createCircleAtEndOfVector(p3, hr));
-		result.add(Utilities.createCircleAtEndOfVector(vector, hr));
-		return null;
 	}
 
 	@Override
@@ -82,14 +63,22 @@ public class TriangleWrapper extends AbstractShapeWrapper {
 
 	@Override
 	public Double getRotateHandleCenter(double radius) {
-		// TODO Auto-generated method stub
-		return null;
+		Triangle t = this.getTriangle();
+		int maxX = Utilities.max(t.getXCoords());
+		return new Double(maxX + radius*2.0, 0.0);
 	}
 
 	@Override
 	public Iterable<Double> getResizeHandleCenters() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Double> result = new ArrayList<Double>();
+		Triangle t = this.getTriangle();
+		Point2D.Double p1 = t.getFirstPoint();
+		Point2D.Double p2 = t.getSecondPoint();
+		Point2D.Double p3 = t.getThirdPoint();
+		result.add(p1);
+		result.add(p2);
+		result.add(p3);
+		return result;
 	}
 
 }

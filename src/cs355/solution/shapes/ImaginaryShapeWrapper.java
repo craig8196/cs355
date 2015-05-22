@@ -13,11 +13,6 @@ public class ImaginaryShapeWrapper extends AbstractShapeWrapper {
 	}
 
 	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		return new ArrayList<Shape>();
-	}
-
-	@Override
 	public void setFirstTwoPoints(Double p1, Double p2) {
 		return;
 	}

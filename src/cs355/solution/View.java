@@ -1,5 +1,6 @@
 package cs355.solution;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -39,6 +40,9 @@ public class View implements Observer, ViewRefresher {
 			this.updateVScrollBar();
 			this.initialized = true;
 		}
+		float width = 1.0f/(float)this.controller.getZoomScalingFactor();
+		BasicStroke lineStroke = new BasicStroke(width);
+		g2d.setStroke(lineStroke);
 		AffineTransform worldToView = this.controller.getWorldToViewTransform();
 		for(Triple<Color, AffineTransform, Shape> p: this.model.getGraphicalColorShapeTriples()) {
 			g2d.setColor(p.first);
@@ -50,7 +54,6 @@ public class View implements Observer, ViewRefresher {
 		}
 		AbstractShapeWrapper asw = this.controller.getCurrentShape();
 		if(asw.isSelected()) {
-			System.out.println("Drawing selected.");
 			AffineTransform objToWorldToView = new AffineTransform(worldToView);
 			objToWorldToView.concatenate(asw.getObjectToWorldTransform());
 			g2d.setTransform(objToWorldToView);
@@ -60,8 +63,7 @@ public class View implements Observer, ViewRefresher {
 				g2d.draw(outline);
 			}
 			
-			for(Shape s: asw.getSelectedHandleShapes()) {
-				System.out.println(s);
+			for(Shape s: asw.getSelectedHandleShapes(this.controller.getHandleRadiusInWorldCoords())) {
 				g2d.draw(s);
 			}
 		}

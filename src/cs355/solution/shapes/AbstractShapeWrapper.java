@@ -3,7 +3,9 @@ package cs355.solution.shapes;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 import cs355.solution.Model;
 
@@ -59,7 +61,6 @@ public abstract class AbstractShapeWrapper {
 		if(this.rotating) {
 			this.rotate(p);
 		} else if(this.translating) {
-			System.out.println("Translating line parent.");
 			this.translate(p);
 		} else if(this.resizing) {
 			this.resize(p);
@@ -93,9 +94,6 @@ public abstract class AbstractShapeWrapper {
 	}
 	
 	public void setSelected(boolean s) {
-		if(s) {
-			System.out.println("Selected");
-		}
 		this.selected = s;
 	}
 	
@@ -143,7 +141,15 @@ public abstract class AbstractShapeWrapper {
 		return this.getGraphicalShape();
 	}
 	
-	public abstract Iterable<Shape> getSelectedHandleShapes();
+	public Iterable<Shape> getSelectedHandleShapes(double radius) {
+		ArrayList<Shape> result = new ArrayList<Shape>();
+		double hr = radius;
+		double hd = hr*2.0;
+		for(Point2D.Double p: getAllHandleCenters(radius)) {
+			result.add(new Ellipse2D.Double(p.x - hr, p.y - hr, hd, hd));
+		}
+		return result;
+	}
 	
 	public abstract void setFirstTwoPoints(Point2D.Double p1, Point2D.Double p2);
 	
@@ -159,6 +165,8 @@ public abstract class AbstractShapeWrapper {
 		if(handleCenter == null) {
 			return false;
 		}
+		AffineTransform objToWorld = this.getObjectToWorldTransform();
+		objToWorld.transform(handleCenter, handleCenter);
 		double dx = Math.abs(handleCenter.x - click.x);
 		double dy = Math.abs(handleCenter.y - click.y);
 		if(dx*dx + dy*dy <= radius*radius) {
@@ -171,8 +179,15 @@ public abstract class AbstractShapeWrapper {
 	public boolean hitResizeHandle(Point2D.Double click, double radius) {
 		Iterable<Point2D.Double> resizePoints = this.getResizeHandleCenters();
 		
+		if(resizePoints == null) {
+			return false;
+		}
+		
+		AffineTransform objToWorld = this.getObjectToWorldTransform();
 		for(Point2D.Double p: resizePoints) {
-			if(Utilities.isPointNearPoint(p, click, radius)) {
+			Point2D.Double pWorld = new Point2D.Double();
+			objToWorld.transform(p, pWorld);
+			if(Utilities.isPointNearPoint(pWorld, click, radius)) {
 				return true;
 			}
 		}
@@ -182,6 +197,29 @@ public abstract class AbstractShapeWrapper {
 	
 	public boolean hitShape(Point2D.Double p, double tolerance) {
 		return this.model.getShapeById(this.id).isPointInShape(p, tolerance);
+	}
+	
+	public Iterable<Point2D.Double> getAllHandleCenters(double radius) {
+		ArrayList<Point2D.Double> result = new ArrayList<Point2D.Double>();
+		Iterable<Point2D.Double> hcs = this.getResizeHandleCenters();
+		Point2D.Double hc = this.getRotateHandleCenter(radius);
+		if(hcs != null) {
+			for(Point2D.Double p: hcs) {
+				if(p != null) {
+					result.add(p);
+				}
+			}
+		}
+		if(hc != null) {
+			result.add(hc);
+		}
+		return result;
+	}
+	
+	public void resetAllSelectingFeatures() {
+		this.resizing = false;
+		this.translating = false;
+		this.rotating = false;
 	}
 	
 }

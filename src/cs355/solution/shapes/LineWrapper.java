@@ -1,14 +1,12 @@
 package cs355.solution.shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 
 import cs355.solution.Model;
-import cs355.solution.ModelWrapper;
 
 public class LineWrapper extends AbstractShapeWrapper {
 
@@ -21,21 +19,6 @@ public class LineWrapper extends AbstractShapeWrapper {
 	
 	private Line getLine() {
 		return (Line)this.model.getShapeById(this.id);
-	}
-
-	@Override
-	public Iterable<Shape> getSelectedHandleShapes() {
-		ArrayList<Shape> result = new ArrayList<Shape>();
-		Line l = this.getLine();
-		double hr = ModelWrapper.HANDLE_RADIUS;
-		double hd = hr*2.0;
-		Point2D.Double p1 = l.getFirstPoint();
-		Point2D.Double p2 = l.getSecondPoint();
-		Ellipse2D.Double h1 = new Ellipse2D.Double(p1.x - hr, p1.y - hr, hd, hd);
-		Ellipse2D.Double h2 = new Ellipse2D.Double(p2.x - hr, p2.y - hr, hd, hd);
-		result.add(h1);
-		result.add(h2);
-		return result;
 	}
 
 	@Override
