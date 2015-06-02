@@ -65,7 +65,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private double fovY = Math.PI/3; // 60 degrees
 	private double aspectRatio = 1.0; // Just to test the stretch component
 	private double nearPlane = 1.0;
-	private double farPlane = 1000.0;
+	private double farPlane = 100.0;
 	private double[][] clipMatrix = Utilities.new3dIdentityMatrix();
 	private double[][] clipTo2dWorldMatrix = Utilities.new3dIdentityMatrix();
 	
@@ -76,6 +76,14 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		this.resetWorldToCameraMatrix();
 		this.resetClipMatrix();
 		this.resetClipTo2dWorldMatrix();
+	}
+	
+	private void resetCameraLocation() {
+		this.camera.x = 0.0;
+		this.camera.y = 2.0;
+		this.camera.z = -40.0;
+		this.xzCameraAngle = 0.0;
+		this.resetWorldToCameraMatrix();
 	}
 	
 	private void resetClipMatrix() {
@@ -332,7 +340,6 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 
 	@Override
 	public void toggle3DModelDisplay() {
-		System.out.println("toggle 3d");
 		this.modelDisplay3d = !this.modelDisplay3d;
 		this.view.update();
 	}
@@ -347,7 +354,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		if(this.is3dModeEnabled()) {
 			double fbInc = 0.0; // Forward backward change.
 	    	double lrInc = 0.0; // Left right change.
-	    	double udInc = 0.0; // Up down change.
+	    	double udInc = 0.0; // Up down change.a
 	    	double lrAngleInc = 0.0; // Angle change.
 			while(iterator.hasNext()) {
 				char key = (char)iterator.next().intValue();
@@ -360,6 +367,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 					case 'E': lrAngleInc -= LR_ANGLE_INCR; break;
 					case 'R': udInc += UD_INCR; break;
 					case 'F': udInc -= UD_INCR; break;
+					case 'H': this.resetCameraLocation(); this.view.update(); return;
 				}
 			}
 			if(lrInc != 0.0 || fbInc != 0.0 || udInc != 0.0 || lrAngleInc != 0.0) {

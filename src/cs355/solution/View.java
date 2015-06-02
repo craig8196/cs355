@@ -98,13 +98,14 @@ public class View implements Observer, ViewRefresher {
 						{l.end.z},
 						{1.0}
 					};
+					// clip space points
 					double[][] start2 = Utilities.matrixMultiply(stack.peek(), start);
 					double[][] end2 = Utilities.matrixMultiply(stack.peek(), end);
 //					Utilities.printMatrix(start2);
 //					Utilities.printMatrix(end2);
 					if(Utilities.showLine(start2, end2)) {
-						Utilities.modPointDivideByW(start2);
-						Utilities.modPointDivideByW(end2);
+						Utilities.homogenousDivide(start2);
+						Utilities.homogenousDivide(end2);
 //						Utilities.printMatrix(start2);
 //						Utilities.printMatrix(end2);
 						start2 = Utilities.matrixMultiply(clipTo2dWorldMatrix, start2);

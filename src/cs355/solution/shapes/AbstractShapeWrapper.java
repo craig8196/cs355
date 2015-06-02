@@ -136,7 +136,14 @@ public abstract class AbstractShapeWrapper {
 	}
 	
 	public AffineTransform getWorldToObjectTransform() {
-		return this.model.getShapeById(this.id).getWorldToObjectTransform();
+		AbstractShape s = this.model.getShapeById(this.id);
+		AffineTransform result = null;
+		if(s == null) {
+			result = new AffineTransform();
+		} else {
+			result = s.getWorldToObjectTransform();
+		}
+		return result;
 	}
 	
 	public Color getSelectedColor() {

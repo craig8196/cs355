@@ -221,7 +221,7 @@ public class Utilities {
 		return result;
 	}
 
-	public static void modPointDivideByW(double[][] p) {
+	public static void homogenousDivide(double[][] p) {
 		for(int i = 0; i < p.length - 1; i++) {
 			p[i][0] = p[i][0]/p[3][0];
 		}
