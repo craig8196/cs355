@@ -5,12 +5,18 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Stack;
 
 import cs355.GUIFunctions;
+import cs355.Line3D;
 import cs355.ViewRefresher;
 import cs355.solution.shapes.AbstractShapeWrapper;
+import cs355.solution.shapes.Utilities;
 
 
 public class View implements Observer, ViewRefresher {
@@ -67,7 +73,50 @@ public class View implements Observer, ViewRefresher {
 			}
 		}
 		if(this.controller.is3dModeEnabled()) {
-			System.out.println("redraw 3d");
+			g2d.setTransform(this.controller.getWorldToViewTransform());
+			double[][] clipMatrix = this.controller.getClipMatrix();
+			double[][] clipTo2dWorldMatrix = this.controller.getClipTo2dWorldMatrix();
+			Stack<double[][]> stack = new Stack<double[][]>();
+			stack.push(Utilities.matrixMultiply(clipMatrix, this.controller.getWorldToCameraMatrix()));
+			for(ObjectTransformation ot: this.controller.getHouseTransformations()) {
+				double[][] newMatrix = Utilities.matrixMultiply(stack.peek(), ot.getTranslateMatrix());
+				newMatrix = Utilities.matrixMultiply(newMatrix, ot.getRotateMatrix());
+				stack.push(newMatrix);
+				
+				Iterator<Line3D> iter = this.controller.getHouseModel().getLines();
+				while(iter.hasNext()) {
+					Line3D l = iter.next();
+					double[][] start = new double[][]{
+						{l.start.x},
+						{l.start.y},
+						{l.start.z},
+						{1.0}
+					};
+					double[][] end = new double[][]{
+						{l.end.x},
+						{l.end.y},
+						{l.end.z},
+						{1.0}
+					};
+					double[][] start2 = Utilities.matrixMultiply(stack.peek(), start);
+					double[][] end2 = Utilities.matrixMultiply(stack.peek(), end);
+//					Utilities.printMatrix(start2);
+//					Utilities.printMatrix(end2);
+					if(Utilities.showLine(start2, end2)) {
+						Utilities.modPointDivideByW(start2);
+						Utilities.modPointDivideByW(end2);
+//						Utilities.printMatrix(start2);
+//						Utilities.printMatrix(end2);
+						start2 = Utilities.matrixMultiply(clipTo2dWorldMatrix, start2);
+						end2 = Utilities.matrixMultiply(clipTo2dWorldMatrix, end2);
+//						Utilities.printMatrix(start2);
+//						Utilities.printMatrix(end2);
+						g2d.setColor(ot.getColor());
+						g2d.draw(new Line2D.Double(new Point2D.Double(start2[0][0], start2[1][0]), new Point2D.Double(end2[0][0], end2[1][0])));
+					}
+				}
+				stack.pop();
+			}
 		}
 	}
 	

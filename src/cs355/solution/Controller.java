@@ -14,19 +14,20 @@ import cs355.Point3D;
 import cs355.solution.shapes.AbstractShapeWrapper;
 import cs355.solution.shapes.ImaginaryShapeWrapper;
 import cs355.solution.shapes.ShapeType;
+import cs355.solution.shapes.Utilities;
 
 public class Controller implements cs355.CS355Controller, MouseListener, MouseMotionListener {
 	
 	private HouseModel house = new HouseModel();
 	private ObjectTransformation[] houses = new ObjectTransformation[]{
-	    new ObjectTransformation(),
-	    (new ObjectTransformation(-15.0, 0.0, 15.0, Math.PI/2.0)).setColor(255, 0, 0),
-	    (new ObjectTransformation(15.0, 0.0, 15.0, -Math.PI/2.0)).setColor(0, 255, 0),
+	    new ObjectTransformation().setColor(128, 128, 128),
+	    (new ObjectTransformation(-15.0, 0.0, 15.0, -Math.PI/2.0)).setColor(255, 0, 0),
+	    (new ObjectTransformation(15.0, 0.0, 15.0, Math.PI/2.0)).setColor(0, 255, 0),
 	    (new ObjectTransformation(0.0, 0.0, 30.0, Math.PI)).setColor(0, 0, 255),
-	    (new ObjectTransformation(-15.0, 0.0, -2.5, Math.PI/4.0)).setColor(255, 0, 255),
-	    (new ObjectTransformation(15.0, 0.0, -2.5, -Math.PI/4.0)).setColor(255, 255, 0),
-	    (new ObjectTransformation(-15.0, 0.0, 32.5, Math.PI*3.0/4.0)).setColor(0, 255, 255),
-	    (new ObjectTransformation(15.0, 0.0, 32.5, -Math.PI*3.0/4.0)).setColor(255, 255, 255),
+	    (new ObjectTransformation(-15.0, 0.0, -2.5, -Math.PI/4.0)).setColor(255, 0, 255),
+	    (new ObjectTransformation(15.0, 0.0, -2.5, Math.PI/4.0)).setColor(255, 255, 0),
+	    (new ObjectTransformation(-15.0, 0.0, 32.5, -Math.PI*3.0/4.0)).setColor(0, 255, 255),
+	    (new ObjectTransformation(15.0, 0.0, 32.5, Math.PI*3.0/4.0)).setColor(255, 255, 255),
 	};
 	
 	private View view = null;
@@ -47,14 +48,68 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	
 	// Zooming in and out.
 	private double[] zoomLevels = { 0.25, 0.5, 1.0, 2.0, 4.0 };
-	private int currentZoomLevelIndex = 2;
+	private int currentZoomLevelIndex = 0;
 	private Point2D.Double viewportTopLeft = new Point2D.Double(0.0, 0.0);
 	private boolean updatingZoom = false;
 	
 	// 3d Mode
 	private boolean modelDisplay3d = false;
-	private Point3D camera = new Point3D(0.0, 2.0, -15.0);
+	private Point3D camera = new Point3D(0.0, 2.0, -40.0);
 	private double xzCameraAngle = 0.0;
+	private double[][] worldToCameraMatrix = new double[][]{
+		{1.0, 0.0, 0.0, -this.camera.x},
+		{0.0, 1.0, 0.0, -this.camera.y},
+		{0.0, 0.0, 1.0, -this.camera.z},
+		{0.0, 0.0, 0.0, 1.0}
+	};
+	private double fovY = Math.PI/3; // 60 degrees
+	private double aspectRatio = 1.0; // Just to test the stretch component
+	private double nearPlane = 1.0;
+	private double farPlane = 1000.0;
+	private double[][] clipMatrix = Utilities.new3dIdentityMatrix();
+	private double[][] clipTo2dWorldMatrix = Utilities.new3dIdentityMatrix();
+	
+	public Controller(View v, ModelWrapper m) {
+		this.model = m;
+		this.view = v;
+		this.currentShape = new ImaginaryShapeWrapper(m.model, Model.INVALID_ID);
+		this.resetWorldToCameraMatrix();
+		this.resetClipMatrix();
+		this.resetClipTo2dWorldMatrix();
+	}
+	
+	private void resetClipMatrix() {
+		Utilities.zeroMatrix(this.clipMatrix);
+		double zoomY = 1.0/Math.tan(this.fovY/2.0);
+		double zoomX = zoomY*this.aspectRatio;
+		double f = this.farPlane;
+		double n = this.nearPlane;
+		this.clipMatrix[0][0] = zoomX;
+		this.clipMatrix[1][1] = zoomY;
+		this.clipMatrix[2][2] = (f + n)/(f - n);
+		this.clipMatrix[3][2] = 1.0;
+		this.clipMatrix[2][3] = (-2.0*n*f)/(f - n);
+	}
+	
+	private void resetClipTo2dWorldMatrix() {
+		Utilities.zeroMatrix(this.clipTo2dWorldMatrix);
+		double xScale = (ModelWrapper.WORLD_X_MAX - ModelWrapper.WORLD_X_MIN)/2.0;
+		double yScale = (ModelWrapper.WORLD_Y_MAX - ModelWrapper.WORLD_Y_MIN)/2.0;
+		this.clipTo2dWorldMatrix[0][0] = xScale;
+		this.clipTo2dWorldMatrix[1][1] = -yScale; // Flip about x axis.
+		this.clipTo2dWorldMatrix[0][3] = xScale + ModelWrapper.WORLD_X_MIN;
+		this.clipTo2dWorldMatrix[1][3] = yScale + ModelWrapper.WORLD_Y_MIN;
+		this.clipTo2dWorldMatrix[2][2] = 1.0;
+		this.clipTo2dWorldMatrix[3][3] = 1.0;
+	}
+	
+	public double[][] getClipMatrix() {
+		return this.clipMatrix;
+	}
+	
+	public double[][] getClipTo2dWorldMatrix() {
+		return this.clipTo2dWorldMatrix;
+	}
 	
 	public boolean is3dModeEnabled() {
 		return this.modelDisplay3d;
@@ -78,6 +133,10 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	
 	public double getZoomScalingFactor() {
 		return this.zoomLevels[this.currentZoomLevelIndex];
+	}
+	
+	public double[][] getWorldToCameraMatrix() {
+		return this.worldToCameraMatrix;
 	}
 	
 	public AffineTransform getWorldToViewTransform() {
@@ -104,12 +163,6 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		return this.viewportTopLeft;
 	}
 	
-	public Controller(View v, ModelWrapper m) {
-		this.model = m;
-		this.view = v;
-		this.currentShape = new ImaginaryShapeWrapper(m.model, Model.INVALID_ID);
-	}
-	
 	@Override
 	public void colorButtonHit(Color c) {
 		if(c == null) {
@@ -120,6 +173,29 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		if(this.selecting) {
 			this.currentShape.setColor(c);
 		}
+	}
+	
+	public void resetWorldToCameraMatrix() {
+		Utilities.matrixMultiply(this.getWorldToCameraRotateMatrix(), this.getWorldToCameraTranslateMatrix(), this.worldToCameraMatrix);
+	}
+	
+	public double[][] getWorldToCameraTranslateMatrix() {
+		double[][] result = Utilities.new3dIdentityMatrix();
+		result[0][3] = -this.camera.x;
+		result[1][3] = -this.camera.y;
+		result[2][3] = -this.camera.z;
+		return result;
+	}
+	
+	public double[][] getWorldToCameraRotateMatrix() {
+		double[][] result = Utilities.new3dIdentityMatrix();
+		double cos = Math.cos(this.xzCameraAngle);
+		double sin = Math.sin(this.xzCameraAngle);
+		result[0][0] = cos;
+		result[2][2] = cos;
+		result[0][2] = sin;
+		result[2][0] = -sin;
+		return result;
 	}
 	
 	public Color getCurrentColor() {
@@ -258,24 +334,54 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	public void toggle3DModelDisplay() {
 		System.out.println("toggle 3d");
 		this.modelDisplay3d = !this.modelDisplay3d;
+		this.view.update();
 	}
 
+	private static final double LR_INCR = 0.3;
+	private static final double UD_INCR = 0.3;
+	private static final double FB_INCR = 0.3;
+	private static final double LR_ANGLE_INCR = (2*Math.PI)/200.0;
+	private static final double TWO_PI = Math.PI*2.0;
 	@Override
 	public void keyPressed(Iterator<Integer> iterator) {
 		if(this.is3dModeEnabled()) {
+			double fbInc = 0.0; // Forward backward change.
+	    	double lrInc = 0.0; // Left right change.
+	    	double udInc = 0.0; // Up down change.
+	    	double lrAngleInc = 0.0; // Angle change.
 			while(iterator.hasNext()) {
 				char key = (char)iterator.next().intValue();
 				switch(key) {
-					case 'W': System.out.println('w'); break;
-					case 'A': System.out.println('a'); break;
-					case 'S': System.out.println('s'); break;
-					case 'D': System.out.println('d'); break;
-					case 'Q': System.out.println('q'); break;
-					case 'E': System.out.println('e'); break;
-					case 'R': System.out.println('r'); break;
-					case 'F': System.out.println('f'); break;
+					case 'W': fbInc += FB_INCR; break;
+					case 'A': lrInc -= LR_INCR; break;
+					case 'S': fbInc -= FB_INCR; break;
+					case 'D': lrInc += LR_INCR; break;
+					case 'Q': lrAngleInc += LR_ANGLE_INCR; break;
+					case 'E': lrAngleInc -= LR_ANGLE_INCR; break;
+					case 'R': udInc += UD_INCR; break;
+					case 'F': udInc -= UD_INCR; break;
 				}
 			}
+			if(lrInc != 0.0 || fbInc != 0.0 || udInc != 0.0 || lrAngleInc != 0.0) {
+	        	double sin = Math.sin(-this.xzCameraAngle);
+	        	double cos = Math.cos(-this.xzCameraAngle);
+	        	this.camera.x += (fbInc*sin + lrInc*cos);
+	        	this.camera.y += udInc;
+	        	this.camera.z += (fbInc*cos - lrInc*sin);
+	        	this.xzCameraAngle += lrAngleInc;
+	        	
+	        	// Wrap angles.
+	        	if(this.xzCameraAngle > TWO_PI) {
+	        		this.xzCameraAngle -= TWO_PI;
+	        	}
+	        	if(this.xzCameraAngle < -TWO_PI) {
+	        		this.xzCameraAngle += TWO_PI;
+	        	}
+	        	
+	        	// Update matrix.
+	        	this.resetWorldToCameraMatrix();
+	        	this.view.update();
+	        }
 		}
 	}
 

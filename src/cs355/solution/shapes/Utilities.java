@@ -160,4 +160,82 @@ public class Utilities {
 		return result;
 	}
 	
+	public static void matrixMultiply(double[][] left, double[][] right, double[][] result) {
+		assert left.length != 0;
+		assert right.length != 0;
+		assert result.length != 0;
+		int rowsLeft = left.length;
+		int rowsRight = right.length;
+		int colsLeft = left[0].length;
+		int colsRight = right[0].length;
+		assert colsLeft == rowsRight;
+		assert rowsLeft == result.length;
+		assert colsRight == result[0].length;
+		Utilities.zeroMatrix(result);
+		for(int i = 0; i < rowsLeft; i++) {
+			for(int j = 0; j < colsLeft; j++) {
+				for(int k = 0; k < colsRight; k++) {
+					result[i][k] += left[i][j]*right[j][k];
+				}
+			}
+		}
+	}
+	
+	
+	private static final double IN = 0.0;
+	private static final double OUT_NEG = -1.0;
+	private static final double OUT_POS = 1.0;
+	// Help changes coordinates to demonstrate if the point is in bounds or not.
+	private static void modBounds(double[][] p) {
+//		System.out.println(p[3][0]);
+		for(int i = 0; i < p.length-1; i++) {
+			double val = p[i][0];
+			if(val < -p[3][0]) {
+				val = OUT_NEG;
+			} else if(val > p[3][0]) {
+				val = OUT_POS;
+			} else {
+				val = IN;
+			}
+			p[i][0] = val;
+		}
+//		Utilities.printMatrix(p);
+	}
+	
+	// p1 and p2 should already be clipped
+	public static boolean showLine(double[][] p1, double[][] p2) {
+		boolean result = true;
+		double[][] p1n = Utilities.copyMatrix(p1);
+		double[][] p2n = Utilities.copyMatrix(p2);
+		modBounds(p1n);
+		modBounds(p2n);
+		if(p1n[0][0] == p2n[0][0] && p1n[0][0] != IN) {
+			result = false;
+		}
+		if(p1n[1][0] == p2n[1][0] && p1n[1][0] != IN) {
+			result = false;
+		}
+		if(p1n[2][0] != IN || p2n[2][0] != IN) {
+			result = false;
+		}
+		return result;
+	}
+
+	public static void modPointDivideByW(double[][] p) {
+		for(int i = 0; i < p.length - 1; i++) {
+			p[i][0] = p[i][0]/p[3][0];
+		}
+		p[3][0] = 1.0;
+	}
+	
+	public static void printMatrix(double[][] m) {
+		System.out.println("Matrix:");
+		for(int i = 0; i < m.length; i++) {
+			for(int j = 0; j < m[i].length; j++) {
+				System.out.print(m[i][j] + ", ");
+			}
+			System.out.println();
+		}
+	}
+	
 }
