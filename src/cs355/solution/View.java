@@ -66,6 +66,9 @@ public class View implements Observer, ViewRefresher {
 				g2d.draw(s);
 			}
 		}
+		if(this.controller.is3dModeEnabled()) {
+			System.out.println("redraw 3d");
+		}
 	}
 	
 	public void updateHScrollBar() {

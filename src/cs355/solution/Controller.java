@@ -9,11 +9,25 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
+import cs355.HouseModel;
+import cs355.Point3D;
 import cs355.solution.shapes.AbstractShapeWrapper;
 import cs355.solution.shapes.ImaginaryShapeWrapper;
 import cs355.solution.shapes.ShapeType;
 
 public class Controller implements cs355.CS355Controller, MouseListener, MouseMotionListener {
+	
+	private HouseModel house = new HouseModel();
+	private ObjectTransformation[] houses = new ObjectTransformation[]{
+	    new ObjectTransformation(),
+	    (new ObjectTransformation(-15.0, 0.0, 15.0, Math.PI/2.0)).setColor(255, 0, 0),
+	    (new ObjectTransformation(15.0, 0.0, 15.0, -Math.PI/2.0)).setColor(0, 255, 0),
+	    (new ObjectTransformation(0.0, 0.0, 30.0, Math.PI)).setColor(0, 0, 255),
+	    (new ObjectTransformation(-15.0, 0.0, -2.5, Math.PI/4.0)).setColor(255, 0, 255),
+	    (new ObjectTransformation(15.0, 0.0, -2.5, -Math.PI/4.0)).setColor(255, 255, 0),
+	    (new ObjectTransformation(-15.0, 0.0, 32.5, Math.PI*3.0/4.0)).setColor(0, 255, 255),
+	    (new ObjectTransformation(15.0, 0.0, 32.5, -Math.PI*3.0/4.0)).setColor(255, 255, 255),
+	};
 	
 	private View view = null;
 	private ModelWrapper model = null;
@@ -36,6 +50,23 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private int currentZoomLevelIndex = 2;
 	private Point2D.Double viewportTopLeft = new Point2D.Double(0.0, 0.0);
 	private boolean updatingZoom = false;
+	
+	// 3d Mode
+	private boolean modelDisplay3d = false;
+	private Point3D camera = new Point3D(0.0, 2.0, -15.0);
+	private double xzCameraAngle = 0.0;
+	
+	public boolean is3dModeEnabled() {
+		return this.modelDisplay3d;
+	}
+	
+	public HouseModel getHouseModel() {
+		return this.house;
+	}
+	
+	public ObjectTransformation[] getHouseTransformations() {
+		return this.houses;
+	}
 	
 	public double getToleranceInWorldCoords() {
 		return ModelWrapper.TOLERANCE/this.getZoomScalingFactor();
@@ -225,14 +256,27 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 
 	@Override
 	public void toggle3DModelDisplay() {
-		// TODO Auto-generated method stub
-		
+		System.out.println("toggle 3d");
+		this.modelDisplay3d = !this.modelDisplay3d;
 	}
 
 	@Override
 	public void keyPressed(Iterator<Integer> iterator) {
-		// TODO Auto-generated method stub
-		
+		if(this.is3dModeEnabled()) {
+			while(iterator.hasNext()) {
+				char key = (char)iterator.next().intValue();
+				switch(key) {
+					case 'W': System.out.println('w'); break;
+					case 'A': System.out.println('a'); break;
+					case 'S': System.out.println('s'); break;
+					case 'D': System.out.println('d'); break;
+					case 'Q': System.out.println('q'); break;
+					case 'E': System.out.println('e'); break;
+					case 'R': System.out.println('r'); break;
+					case 'F': System.out.println('f'); break;
+				}
+			}
+		}
 	}
 
 	@Override

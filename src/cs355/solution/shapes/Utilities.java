@@ -110,4 +110,54 @@ public class Utilities {
 		return furthest;
 	}
 	
+	public static double[][] new3dIdentityMatrix() {
+		return new double[][]{
+			{1.0, 0.0, 0.0, 0.0},
+			{0.0, 1.0, 0.0, 0.0},
+			{0.0, 0.0, 1.0, 0.0},
+			{0.0, 0.0, 0.0, 1.0},
+		};
+	}
+	
+	// Copy a non-jagged 2d array.
+	public static double[][] copyMatrix(double[][] matrix) {
+		int rows = matrix.length;
+		int cols = matrix[0].length;
+		double[][] result = new double[rows][cols];
+		for(int i = 0; i < rows; i++) {
+			for(int j = 0; j < cols; j++) {
+				result[i][j] = matrix[i][j];
+			}
+		}
+		return result;
+	}
+	
+	public static void zeroMatrix(double[][] matrix) {
+		for(int i = 0; i < matrix.length; i++) {
+			for(int j = 0; j < matrix[i].length; j++) {
+				matrix[i][j] = 0.0;
+			}
+		}
+	}
+	
+	public static double[][] matrixMultiply(double[][] left, double[][] right) {
+		assert left.length != 0;
+		assert right.length != 0;
+		int rowsLeft = left.length;
+		int rowsRight = right.length;
+		int colsLeft = left[0].length;
+		int colsRight = right[0].length;
+		assert colsLeft == rowsRight;
+		double[][] result = new double[rowsLeft][colsRight];
+		Utilities.zeroMatrix(result);
+		for(int i = 0; i < rowsLeft; i++) {
+			for(int j = 0; j < colsLeft; j++) {
+				for(int k = 0; k < colsRight; k++) {
+					result[i][k] += left[i][j]*right[j][k];
+				}
+			}
+		}
+		return result;
+	}
+	
 }
