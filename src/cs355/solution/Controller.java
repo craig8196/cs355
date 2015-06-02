@@ -63,7 +63,7 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 		{0.0, 0.0, 0.0, 1.0}
 	};
 	private double fovY = Math.PI/3; // 60 degrees
-	private double aspectRatio = 1.0; // Just to test the stretch component
+	private double aspectRatio = ModelWrapper.VIEW_HEIGHT/ModelWrapper.VIEW_WIDTH; // Just to test the stretch component
 	private double nearPlane = 1.0;
 	private double farPlane = 100.0;
 	private double[][] clipMatrix = Utilities.new3dIdentityMatrix();
