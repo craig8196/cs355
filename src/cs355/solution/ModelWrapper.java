@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observer;
 
+import cs355.HouseModel;
 import cs355.solution.shapes.AbstractShape;
 import cs355.solution.shapes.AbstractShapeWrapper;
 import cs355.solution.shapes.Circle;
@@ -27,6 +28,14 @@ import cs355.solution.shapes.TriangleWrapper;
 
 public class ModelWrapper {
 	
+	public HouseModel getHouseModel() {
+		return model.getHouseModel();
+	}
+
+	public ObjectTransformation[] getHouseTransformations() {
+		return model.getHouseTransformations();
+	}
+
 	public static final double TOLERANCE = 4.0; // In view units.
 	public static final double HANDLE_RADIUS = 10.0; // In view units.
 	

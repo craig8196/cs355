@@ -78,12 +78,12 @@ public class View implements Observer, ViewRefresher {
 			double[][] clipTo2dWorldMatrix = this.controller.getClipTo2dWorldMatrix();
 			Stack<double[][]> stack = new Stack<double[][]>();
 			stack.push(Utilities.matrixMultiply(clipMatrix, this.controller.getWorldToCameraMatrix()));
-			for(ObjectTransformation ot: this.controller.getHouseTransformations()) {
+			for(ObjectTransformation ot: this.model.getHouseTransformations()) {
 				double[][] newMatrix = Utilities.matrixMultiply(stack.peek(), ot.getTranslateMatrix());
 				newMatrix = Utilities.matrixMultiply(newMatrix, ot.getRotateMatrix());
 				stack.push(newMatrix);
 				
-				Iterator<Line3D> iter = this.controller.getHouseModel().getLines();
+				Iterator<Line3D> iter = this.model.getHouseModel().getLines();
 				while(iter.hasNext()) {
 					Line3D l = iter.next();
 					double[][] start = new double[][]{

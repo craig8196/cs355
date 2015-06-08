@@ -9,7 +9,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
-import cs355.HouseModel;
 import cs355.Point3D;
 import cs355.solution.shapes.AbstractShapeWrapper;
 import cs355.solution.shapes.ImaginaryShapeWrapper;
@@ -17,18 +16,6 @@ import cs355.solution.shapes.ShapeType;
 import cs355.solution.shapes.Utilities;
 
 public class Controller implements cs355.CS355Controller, MouseListener, MouseMotionListener {
-	
-	private HouseModel house = new HouseModel();
-	private ObjectTransformation[] houses = new ObjectTransformation[]{
-	    new ObjectTransformation().setColor(128, 128, 128),
-	    (new ObjectTransformation(-15.0, 0.0, 15.0, -Math.PI/2.0)).setColor(255, 0, 0),
-	    (new ObjectTransformation(15.0, 0.0, 15.0, Math.PI/2.0)).setColor(0, 255, 0),
-	    (new ObjectTransformation(0.0, 0.0, 30.0, Math.PI)).setColor(0, 0, 255),
-	    (new ObjectTransformation(-15.0, 0.0, -2.5, -Math.PI/4.0)).setColor(255, 0, 255),
-	    (new ObjectTransformation(15.0, 0.0, -2.5, Math.PI/4.0)).setColor(255, 255, 0),
-	    (new ObjectTransformation(-15.0, 0.0, 32.5, -Math.PI*3.0/4.0)).setColor(0, 255, 255),
-	    (new ObjectTransformation(15.0, 0.0, 32.5, Math.PI*3.0/4.0)).setColor(255, 255, 255),
-	};
 	
 	private View view = null;
 	private ModelWrapper model = null;
@@ -121,14 +108,6 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	
 	public boolean is3dModeEnabled() {
 		return this.modelDisplay3d;
-	}
-	
-	public HouseModel getHouseModel() {
-		return this.house;
-	}
-	
-	public ObjectTransformation[] getHouseTransformations() {
-		return this.houses;
 	}
 	
 	public double getToleranceInWorldCoords() {
