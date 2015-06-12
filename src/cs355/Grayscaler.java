@@ -16,7 +16,6 @@ public class Grayscaler
 
     public static BufferedImage grayScale(BufferedImage inputImage)
     {
-    	System.out.println(inputImage);
          int width = inputImage.getWidth();
          int height = inputImage.getHeight();
          

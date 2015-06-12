@@ -8,6 +8,7 @@ import java.util.Observable;
 import cs355.HouseModel;
 import cs355.solution.shapes.AbstractShape;
 import cs355.solution.shapes.UpdateShape;
+import cs355.solution.shapes.Utilities;
 
 public class Model extends Observable {
 
@@ -75,27 +76,103 @@ public class Model extends Observable {
 	}
 	
 	public void imageChangeBrightness(int amount) {
-		
+		Utilities.pixelLevelOperation(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			(v)->{
+				v += amount;
+				v = Utilities.clampToRange(v, 0, 255);
+				return v;
+			}
+		);
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public void imageChangeContrast(int amount) {
-		
+		double ratio = (amount + 100.0f)/100.0f;
+		double scalar = ratio*ratio*ratio*ratio;
+		Utilities.pixelLevelOperation(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			(v)->{
+				v = (int)(scalar*(v - 128.0) + 128.0);
+				v = Utilities.clampToRange(v, 0, 255);
+				return v;
+			}
+		);
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public void imageUniformBlur() {
-		
+		this.imageMatrix = Utilities.applyKernel(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			new int[][]{
+				{1,1,1},
+				{1,1,1},
+				{1,1,1}
+			}, 
+			0
+		);
+		double scalar = 1.0/9.0;
+		Utilities.pixelLevelOperation(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			(v)->{
+				double result = v*scalar;
+				return Utilities.clampToRange((int)Math.round(result), 0, 255);
+			}
+		);
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public void imageMedianBlur() {
-		
+		this.imageMatrix = Utilities.findMedians(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			0
+		);
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public void imageSharpen() {
-		
+		this.imageMatrix = Utilities.applyKernel(
+				this.imageWidth, 
+				this.imageHeight, 
+				this.imageMatrix, 
+				new int[][]{
+					{0,-1,0},
+					{-1,6,-1},
+					{0,-1,0}
+				}, 
+				0
+			);
+			double scalar = 1.0/2.0;
+			Utilities.pixelLevelOperation(
+				this.imageWidth, 
+				this.imageHeight, 
+				this.imageMatrix, 
+				(v)->{
+					double result = v*scalar;
+					return Utilities.clampToRange((int)Math.round(result), 0, 255);
+				}
+			);
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public void imageEdgeDetection() {
-		
+		this.setChanged();
+		this.notifyObservers();
 	}
 	
 	public int hitShape(Point2D.Double p, double tolerance) {

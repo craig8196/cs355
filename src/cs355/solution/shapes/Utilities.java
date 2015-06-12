@@ -2,6 +2,7 @@ package cs355.solution.shapes;
 
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 
 public class Utilities {
 	public static double dot(Point2D.Double p1, Point2D.Double p2) {
@@ -238,4 +239,97 @@ public class Utilities {
 		}
 	}
 	
+	
+	public static void pixelLevelOperation(int width, int height, int[][] in, PixelShader p) {
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				in[y][x] = p.shadePixel(in[y][x]);
+			}
+		}
+	}
+	
+	public static int clampToRange(int value, int low, int high) {
+		if(value > high) {
+			value = high;
+		} else if (value < low) {
+			value = low;
+		}
+		return value;
+	}
+	
+	/**
+	 * 
+	 * @param width
+	 * @param height
+	 * @param in
+	 * @param kernel 3x3 rows by cols
+	 * @param edgeValue
+	 * @return
+	 */
+	public static int[][] applyKernel(int width, int height, int[][] in, int[][] kernel, int edgeValue) {
+		int[][] result = new int[height][width];
+		int kx = 1;
+		int ky = 1;
+		int modLen = 3;
+		int[] modifiers = {-1, 0, 1};
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				int accum = 0;
+				for(int i = 0; i < modLen; i++) {
+					for(int j = 0; j < modLen; j++) {
+						int dy = modifiers[i];
+						int dx = modifiers[j];
+						int ny = dy+y;
+						int nx = dx+x;
+						int val = edgeValue;
+						if(Utilities.inBounds(height, ny) && Utilities.inBounds(width, nx)) {
+							val = in[ny][nx];
+						}
+						accum += val*kernel[ky+dy][kx+dx];
+					}
+				}
+				result[y][x] = accum;
+			}
+		}
+		return result;
+	}
+	
+	public static int[][] findMedians(int width, int height, int[][] in, int edgeValue) {
+		int[][] result = new int[height][width];
+		int mx = 1;
+		int my = 1;
+		int modLen = 3;
+		int[] modifiers = {-1, 0, 1};
+		int[] medians = new int[9];
+		for(int y = 0; y < height; y++) {
+			for(int x = 0; x < width; x++) {
+				for(int i = 0; i < modLen; i++) {
+					for(int j = 0; j < modLen; j++) {
+						int dy = modifiers[i];
+						int dx = modifiers[j];
+						int ny = dy+y;
+						int nx = dx+x;
+						int val = edgeValue;
+						if(Utilities.inBounds(height, ny) && Utilities.inBounds(width, nx)) {
+							val = in[ny][nx];
+						}
+						my = 1+dy;
+						mx = 1+dx;
+						medians[my+(my+1)*mx] = val;
+					}
+				}
+				Arrays.sort(medians);
+				result[y][x] = medians[4];
+			}
+		}
+		return result;
+	}
+	
+	public static boolean inBounds(int length, int index) {
+		if(index >= length || index < 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 }
