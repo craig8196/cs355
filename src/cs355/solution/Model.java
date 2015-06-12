@@ -156,21 +156,51 @@ public class Model extends Observable {
 				}, 
 				0
 			);
-			double scalar = 1.0/2.0;
-			Utilities.pixelLevelOperation(
-				this.imageWidth, 
-				this.imageHeight, 
-				this.imageMatrix, 
-				(v)->{
-					double result = v*scalar;
-					return Utilities.clampToRange((int)Math.round(result), 0, 255);
-				}
-			);
+		double scalar = 1.0/2.0;
+		Utilities.pixelLevelOperation(
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			(v)->{
+				double result = v*scalar;
+				return Utilities.clampToRange((int)Math.round(result), 0, 255);
+			}
+		);
 		this.setChanged();
 		this.notifyObservers();
 	}
 	
 	public void imageEdgeDetection() {
+		int[][] dx = Utilities.applyKernel( // Not scaled by 1/8
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			new int[][]{
+				{-1,0,1},
+				{-2,0,2},
+				{-1,0,1}
+			}, 
+			0
+		);
+		int[][] dy = Utilities.applyKernel( // Not scaled by 1/8
+			this.imageWidth, 
+			this.imageHeight, 
+			this.imageMatrix, 
+			new int[][]{
+				{-1,-2,-1},
+				{0,0,0},
+				{1,2,1}
+			}, 
+			0
+		);
+		double scalar = 1.0/8.0;
+		for(int y = 0; y < this.imageHeight; y++) {
+			for(int x = 0; x < this.imageWidth; x++) {
+				double xval = dx[y][x]*scalar;
+				double yval = dy[y][x]*scalar;
+				this.imageMatrix[y][x] = Utilities.clampToRange((int)Math.round(Math.sqrt(xval*xval + yval*yval)), 0, 255);
+			}
+		}
 		this.setChanged();
 		this.notifyObservers();
 	}
