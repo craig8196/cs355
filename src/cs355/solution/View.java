@@ -7,6 +7,8 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
@@ -44,6 +46,16 @@ public class View implements Observer, ViewRefresher {
 			GUIFunctions.setVScrollBarMax((int)ModelWrapper.WORLD_Y_MAX);
 			this.updateScrollBars();
 			this.initialized = true;
+		}
+		if(this.controller.isBackgroundDisplayEnabled() && this.model.hasImage()) {
+			g2d.setTransform(this.controller.getWorldToViewTransform());
+			BufferedImage img = this.model.getImage();
+			double width = ModelWrapper.WORLD_X_MAX - ModelWrapper.WORLD_X_MIN;
+			double height = ModelWrapper.WORLD_Y_MAX - ModelWrapper.WORLD_Y_MIN;
+			int x = 0;
+			int y = 0;
+			ImageObserver observer = null;
+			g2d.drawImage(img, x, y, (int)width, (int)height, observer);
 		}
 		float width = 1.0f/(float)this.controller.getZoomScalingFactor();
 		BasicStroke lineStroke = new BasicStroke(width);

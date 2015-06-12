@@ -56,6 +56,9 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 	private double[][] clipMatrix = Utilities.new3dIdentityMatrix();
 	private double[][] clipTo2dWorldMatrix = Utilities.new3dIdentityMatrix();
 	
+	// image
+	private boolean showBackgroundDisplay = false;
+	
 	public Controller(View v, ModelWrapper m) {
 		this.model = m;
 		this.view = v;
@@ -374,50 +377,47 @@ public class Controller implements cs355.CS355Controller, MouseListener, MouseMo
 
 	@Override
 	public void doEdgeDetection() {
-		// TODO Auto-generated method stub
-		
+		this.model.imageEdgeDetection();
 	}
 
 	@Override
 	public void doSharpen() {
-		// TODO Auto-generated method stub
-		
+		this.model.imageSharpen();
 	}
 
 	@Override
 	public void doMedianBlur() {
-		// TODO Auto-generated method stub
-		
+		this.model.imageMedianBlur();
 	}
 
 	@Override
 	public void doUniformBlur() {
-		// TODO Auto-generated method stub
-		
+		this.model.imageUniformBlur();
 	}
 
 	@Override
 	public void doChangeContrast(int contrastAmountNum) {
-		// TODO Auto-generated method stub
-		
+		this.model.imageChangeContrast(contrastAmountNum);
 	}
 
 	@Override
 	public void doChangeBrightness(int brightnessAmountNum) {
-		// TODO Auto-generated method stub
-		
+		this.model.imageChangeBrightness(brightnessAmountNum);
 	}
 
 	@Override
 	public void doLoadImage(BufferedImage openImage) {
-		// TODO Auto-generated method stub
-		
+		this.model.setImage(openImage);
 	}
 
 	@Override
 	public void toggleBackgroundDisplay() {
-		// TODO Auto-generated method stub
-		
+		this.showBackgroundDisplay = !this.showBackgroundDisplay;
+		this.view.update();
+	}
+	
+	public boolean isBackgroundDisplayEnabled() {
+		return this.showBackgroundDisplay;
 	}
 	
 	private Point2D.Double getWorldPointFromClick(MouseEvent e) {

@@ -29,6 +29,11 @@ public class Model extends Observable {
 	    (new ObjectTransformation(15.0, 0.0, 32.5, Math.PI*3.0/4.0)).setColor(255, 255, 255),
 	};
 	
+	// images
+	private int imageWidth = 0;
+	private int imageHeight = 0;
+	private int[][] imageMatrix = null;
+	
 	public Model() {}
 	
 	public int addShape(AbstractShape s) {
@@ -39,6 +44,58 @@ public class Model extends Observable {
 		this.setChanged();
 		this.notifyObservers();
 		return this.getFrontShapeId();
+	}
+	
+	public void setImage(int width, int height, int[][] matrix) {
+		this.imageWidth = width;
+		this.imageHeight = height;
+		this.imageMatrix = matrix;
+		this.setChanged();
+		this.notifyObservers();
+	}
+	
+	public boolean hasImage() {
+		if(this.imageMatrix == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	public int getImageWidth() {
+		return imageWidth;
+	}
+	
+	public int getImageHeight() {
+		return imageHeight;
+	}
+	
+	public int[][] getImageMatrix() {
+		return this.imageMatrix;
+	}
+	
+	public void imageChangeBrightness(int amount) {
+		
+	}
+	
+	public void imageChangeContrast(int amount) {
+		
+	}
+	
+	public void imageUniformBlur() {
+		
+	}
+	
+	public void imageMedianBlur() {
+		
+	}
+	
+	public void imageSharpen() {
+		
+	}
+	
+	public void imageEdgeDetection() {
+		
 	}
 	
 	public int hitShape(Point2D.Double p, double tolerance) {

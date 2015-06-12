@@ -16,6 +16,7 @@ public class Grayscaler
 
     public static BufferedImage grayScale(BufferedImage inputImage)
     {
+    	System.out.println(inputImage);
          int width = inputImage.getWidth();
          int height = inputImage.getHeight();
          
@@ -31,14 +32,19 @@ public class Grayscaler
          {
          for (int x = 0; x < width; x++)
          {
+        int gray = 0;
+        
+        if(inputImage.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+        	gray = in.getSample(x, y, 0);
+         } else {
          //Take the red, green, and blue.
          double red = in.getSample(x, y, 0);
          double green = in.getSample(x, y, 1);
          double blue = in.getSample(x, y, 2);
          
         //Create a brightness value according to the formula you gave us.
-         int gray = (int)(0.299*red) + (int)(0.587*green) + (int)(0.114*blue);
-         
+         gray = (int)(0.299*red) + (int)(0.587*green) + (int)(0.114*blue);
+        }
          //Write to the output.
          out.setSample(x, y, 0, gray);
          out.setSample(x, y, 1, gray);
